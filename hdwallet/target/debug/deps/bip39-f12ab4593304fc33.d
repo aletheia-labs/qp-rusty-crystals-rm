@@ -1,0 +1,11 @@
+/Users/metapriest/code/rez/rusty-crystals/target/debug/deps/libbip39-f12ab4593304fc33.rmeta: /Users/metapriest/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bip39-2.1.0/src/lib.rs /Users/metapriest/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bip39-2.1.0/src/internal_macros.rs /Users/metapriest/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bip39-2.1.0/src/language/mod.rs /Users/metapriest/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bip39-2.1.0/src/language/english.rs /Users/metapriest/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bip39-2.1.0/src/pbkdf2.rs
+
+/Users/metapriest/code/rez/rusty-crystals/target/debug/deps/libbip39-f12ab4593304fc33.rlib: /Users/metapriest/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bip39-2.1.0/src/lib.rs /Users/metapriest/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bip39-2.1.0/src/internal_macros.rs /Users/metapriest/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bip39-2.1.0/src/language/mod.rs /Users/metapriest/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bip39-2.1.0/src/language/english.rs /Users/metapriest/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bip39-2.1.0/src/pbkdf2.rs
+
+/Users/metapriest/code/rez/rusty-crystals/target/debug/deps/bip39-f12ab4593304fc33.d: /Users/metapriest/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bip39-2.1.0/src/lib.rs /Users/metapriest/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bip39-2.1.0/src/internal_macros.rs /Users/metapriest/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bip39-2.1.0/src/language/mod.rs /Users/metapriest/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bip39-2.1.0/src/language/english.rs /Users/metapriest/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bip39-2.1.0/src/pbkdf2.rs
+
+/Users/metapriest/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bip39-2.1.0/src/lib.rs:
+/Users/metapriest/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bip39-2.1.0/src/internal_macros.rs:
+/Users/metapriest/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bip39-2.1.0/src/language/mod.rs:
+/Users/metapriest/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bip39-2.1.0/src/language/english.rs:
+/Users/metapriest/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bip39-2.1.0/src/pbkdf2.rs:

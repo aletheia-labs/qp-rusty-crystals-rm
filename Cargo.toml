@@ -1,0 +1,23 @@
+[workspace]
+members = [
+    "hdwallet",
+    "dilithium"
+]
+
+[workspace.dependencies]
+thiserror = "2.0.4"
+rand_core = { version = "0.6.4", features = ["getrandom"] }
+
+[package]
+name = "rusty-crystals"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "rusty_crystals"
+crate-type = ["lib"]
+
+[dependencies]
+rusty-crystals-dilithium = { path = "./dilithium" }
+rusty-crystals-hdwallet = { path = "./hdwallet" }
+getrandom = { version = "0.2", features = ["js"] }

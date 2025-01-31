@@ -1,0 +1,14 @@
+[package]
+name = "rusty-crystals-hdwallet"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+rusty-crystals-dilithium = { path = "../dilithium" }
+rand_core = { version = "0.6.4", default-features = false }
+sha2 = { version = "0.10.8", default-features = false }
+hmac = { version = "0.12.1", default-features = false }
+thiserror = { version = "2.0.11", default-features = false }
+rand_chacha = { version = "0.9.0-beta.1", default-features = false }
+rand = "0.7.3"
+bip39 = { version = "2.0.0", default-features = false }
