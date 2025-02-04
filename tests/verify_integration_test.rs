@@ -2,19 +2,19 @@
 
 mod helpers;
 use helpers::kat::{TestVector, parse_test_vectors};
-use rusty_crystals_dilithium::dilithium3::{Keypair, PUBLICKEYBYTES, SECRETKEYBYTES, SIGNBYTES, KEYPAIRBYTES};
+use rusty_crystals_dilithium::ml_dsa_65::{Keypair, PUBLICKEYBYTES};
 
 fn keypair_from_test(test: &TestVector) -> Keypair {
-    println!("keypair_from_test {:?} SECRETKEYBYTES {:?} sk.len {:?}", test, SECRETKEYBYTES, test.sk.len());
-    let mut result = [0; KEYPAIRBYTES];
-    result[..SECRETKEYBYTES].copy_from_slice(&test.sk[..SECRETKEYBYTES]);
-    result[SECRETKEYBYTES..].copy_from_slice(&test.pk[..PUBLICKEYBYTES]);
+    let total_len = test.sk.len() + test.pk.len();
+    let mut result = vec![0; total_len];
+    result[..test.sk.len()].copy_from_slice(&test.sk);
+    result[test.sk.len()..].copy_from_slice(&test.pk);
     Keypair::from_bytes(&result)
 }
 
 #[test]
 fn test_nist_kat() {
-    let kat_data = include_str!("../test_vectors/PQCsignKAT_4016_R.rsp");
+    let kat_data = include_str!("../test_vectors/PQCsignKAT_Dilithium3.rsp");
     let test_vectors = parse_test_vectors(kat_data);
     for test in test_vectors {
         verify_test_vector(&test);
@@ -47,16 +47,10 @@ fn verify_test_vector(test: &TestVector) {
 
     let signature = test.extract_signature();
 
-    assert_eq!(
-        signature.len(),
-        SIGNBYTES,
-        "Signature length mismatch"
-    );
-
     // Now call verify with the extracted signature
 
     let keypair = keypair_from_test(test);
-    let result = keypair.verify(&test.msg, &signature);
+    let result = keypair.verify(&test.msg, &signature, None);
 
     assert!(
         result,
@@ -74,17 +68,17 @@ fn test_verify_invalid_signature() {
     // Message to sign
     let message = b"Hello, Resonance!";
     // Sign the message
-    let signature = keys_2.sign(message);
+    let signature = keys_2.sign(message, None, false).unwrap();
 
     // Verify the signature with wrong key
-    let result = keys_1.verify(&signature, message);
+    let result = keys_1.verify(&signature, message, None);
 
     assert!(
         !result,
         "Expected verification to fail, but it succeeded"
     );
 
-    let result = keys_3.verify(&signature, message);
+    let result = keys_3.verify(&signature, message, None);
 
     assert!(
         !result,

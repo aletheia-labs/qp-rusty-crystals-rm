@@ -589,7 +589,6 @@ dependencies = [
  "getrandom 0.2.15",
  "rusty-crystals-dilithium",
  "rusty-crystals-hdwallet",
- "thiserror",
 ]
 
 [[package]]

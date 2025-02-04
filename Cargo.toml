@@ -20,5 +20,4 @@ crate-type = ["lib"]
 [dependencies]
 rusty-crystals-dilithium = { path = "./dilithium" }
 rusty-crystals-hdwallet = { path = "./hdwallet" }
-thiserror = { version = "2.0.11", default-features = false }
 getrandom = { version = "0.2", features = ["js"] }
