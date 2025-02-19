@@ -19,6 +19,7 @@ pub enum PH {
     SHA512,
 }
 
+#[cfg(not(feature = "verifier_only"))]
 use rand::RngCore;
 /// Generate random bytes.
 /// 
@@ -26,6 +27,7 @@ use rand::RngCore;
 /// 
 /// * 'bytes' - an array to fill with random data
 /// * 'n' - number of bytes to generate
+#[cfg(not(feature = "verifier_only"))]
 fn random_bytes(bytes: &mut [u8], n: usize) {
     rand::prelude::thread_rng()
         .try_fill_bytes(&mut bytes[..n])
