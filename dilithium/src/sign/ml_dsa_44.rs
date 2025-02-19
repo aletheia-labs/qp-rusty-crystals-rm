@@ -9,6 +9,7 @@ const L: usize = params::ml_dsa_44::L;
 /// * 'pk' - preallocated buffer for public key
 /// * 'sk' - preallocated buffer for private key
 /// * 'seed' - optional seed; if None [random_bytes()] is used for randomness generation
+#[cfg(not(feature = "verifier_only"))]
 pub fn keypair(pk: &mut [u8], sk: &mut [u8], seed: Option<&[u8]>) {
     let mut init_seed = [0u8; params::SEEDBYTES+2];
     match seed {
@@ -69,6 +70,7 @@ pub fn keypair(pk: &mut [u8], sk: &mut [u8], seed: Option<&[u8]>) {
 /// * 'msg' - message to sign
 /// * 'sk' - private key to use
 /// * 'hedged' - indicates wether to randomize the signature or to act deterministicly
+#[cfg(not(feature = "verifier_only"))]
 pub fn signature(sig: &mut [u8], msg: &[u8], sk: &[u8], hedged: bool) {
     let mut rho = [0u8; params::SEEDBYTES];
     let mut tr = [0u8; params::TR_BYTES];
@@ -264,6 +266,7 @@ pub fn verify(sig: &[u8], m: &[u8], pk: &[u8]) -> bool {
 }
 
 #[cfg(test)]
+#[cfg(not(feature = "verifier_only"))]
 mod tests {
     #[test]
     fn self_verify_hedged() {
