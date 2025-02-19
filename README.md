@@ -90,6 +90,15 @@ cargo tarpaulin --workspace
 test_nist_kat test case in 'verify_integration_tests.rs' covers the NIST KAT test cases generated from the PQCrystals 
 for ML-DSA-65. We exported the test file from PQ-Crystals c code, and are importing and testing against it here. 
 
+To regenerate this file...
+```
+git clone https://github.com/pq-crystals/dilithium
+cd dilithium/ref
+make nistkat
+./nistkat/PQCgenKAT_sign5 
+cp ./nistkat/PQCsignKAT_Dilithium5.rsp ???
+```
+
 ## Code Coverage
 This repository has 100% code coverage for all critical logic and functionality. 
 ```./coverage.sh```

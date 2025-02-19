@@ -2,7 +2,7 @@
 
 mod helpers;
 use helpers::kat::{TestVector, parse_test_vectors};
-use rusty_crystals_dilithium::ml_dsa_65::{Keypair, PUBLICKEYBYTES};
+use rusty_crystals_dilithium::ml_dsa_87::{Keypair, PUBLICKEYBYTES};
 
 fn keypair_from_test(test: &TestVector) -> Keypair {
     let total_len = test.sk.len() + test.pk.len();
@@ -14,7 +14,7 @@ fn keypair_from_test(test: &TestVector) -> Keypair {
 
 #[test]
 fn test_nist_kat() {
-    let kat_data = include_str!("../test_vectors/PQCsignKAT_Dilithium3.rsp");
+    let kat_data = include_str!("../test_vectors/PQCsignKAT_Dilithium5.rsp");
     let test_vectors = parse_test_vectors(kat_data);
     for test in test_vectors {
         verify_test_vector(&test);
