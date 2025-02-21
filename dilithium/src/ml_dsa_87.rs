@@ -1,5 +1,10 @@
 use sha2::{Sha256, Sha512, Digest};
 
+#[cfg(feature = "verifier_only")]
+use alloc::vec;
+#[cfg(feature = "verifier_only")]
+use alloc::vec::Vec;
+
 pub const SECRETKEYBYTES: usize = crate::params::ml_dsa_87::SECRETKEYBYTES;
 pub const PUBLICKEYBYTES: usize = crate::params::ml_dsa_87::PUBLICKEYBYTES;
 pub const SIGNBYTES: usize = crate::params::ml_dsa_87::SIGNBYTES;

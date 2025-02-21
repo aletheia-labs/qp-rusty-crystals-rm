@@ -1,3 +1,8 @@
+#![cfg_attr(feature = "verifier_only", no_std)]
+
+#[cfg(feature = "verifier_only")]
+extern crate alloc;
+
 pub mod ml_dsa_44;
 pub mod ml_dsa_65;
 pub mod ml_dsa_87;
