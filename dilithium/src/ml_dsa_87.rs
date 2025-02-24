@@ -66,7 +66,6 @@ impl Keypair {
     /// * 'msg' - message to sign
     /// 
     /// Returns Option<Signature>
-    #[cfg(not(feature = "no_std"))]
     pub fn sign(&self, msg: &[u8], ctx: Option<&[u8]>, hedged: bool) -> Option<Signature> {
         self.secret.sign(msg, ctx, hedged)
     }
@@ -142,7 +141,6 @@ impl SecretKey {
     /// * 'hedged' - wether to use RNG or not
     /// 
     /// Returns Option<Signature>
-    #[cfg(not(feature = "no_std"))]
     pub fn sign(&self, msg: &[u8], ctx: Option<&[u8]>, hedged: bool) -> Option<Signature> {
         match ctx {
             Some(x) => {

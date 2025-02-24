@@ -82,7 +82,6 @@ pub fn keypair(pk: &mut [u8], sk: &mut [u8], seed: Option<&[u8]>) {
 /// 
 /// Note signature depends on std because k_decompose depends on swap which depends on std
 /// 
-#[cfg(not(feature = "no_std"))]
 pub fn signature(sig: &mut [u8], msg: &[u8], sk: &[u8], hedged: bool) {
     let mut rho = [0u8; params::SEEDBYTES];
     let mut tr = [0u8; params::TR_BYTES];
