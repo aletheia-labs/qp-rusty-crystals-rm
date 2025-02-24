@@ -1,6 +1,6 @@
-#![cfg_attr(feature = "verifier_only", no_std)]
+#![cfg_attr(feature = "no_std", no_std)]
 
-#[cfg(feature = "verifier_only")]
+#[cfg(feature = "no_std")]
 extern crate alloc;
 
 pub mod ml_dsa_44;
@@ -24,7 +24,7 @@ pub enum PH {
     SHA512,
 }
 
-#[cfg(not(feature = "verifier_only"))]
+#[cfg(not(feature = "no_std"))]
 use rand::RngCore;
 /// Generate random bytes.
 /// 
@@ -32,7 +32,7 @@ use rand::RngCore;
 /// 
 /// * 'bytes' - an array to fill with random data
 /// * 'n' - number of bytes to generate
-#[cfg(not(feature = "verifier_only"))]
+#[cfg(not(feature = "no_std"))]
 fn random_bytes(bytes: &mut [u8], n: usize) {
     rand::prelude::thread_rng()
         .try_fill_bytes(&mut bytes[..n])

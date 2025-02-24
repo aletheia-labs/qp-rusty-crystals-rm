@@ -1,6 +1,6 @@
 use sha2::{Sha256, Sha512, Digest};
 
-#[cfg(feature = "verifier_only")]
+#[cfg(feature = "no_std")]
 use alloc::{vec, vec::Vec};
 
 pub const SECRETKEYBYTES: usize = crate::params::ml_dsa_87::SECRETKEYBYTES;
@@ -11,13 +11,11 @@ pub const KEYPAIRBYTES: usize = SECRETKEYBYTES + PUBLICKEYBYTES;
 pub type Signature = [u8; SIGNBYTES];
 
 /// A pair of private and public keys.
-#[cfg(not(feature = "verifier_only"))]
 pub struct Keypair {
     pub secret: SecretKey,
     pub public: PublicKey
 }
 
-#[cfg(not(feature = "verifier_only"))]
 impl Keypair {
     /// Generate a Keypair instance.
     /// 
@@ -53,6 +51,7 @@ impl Keypair {
     /// * 'bytes' - private and public keys bytes
     /// 
     /// Returns a Keypair
+    #[cfg(not(feature = "no_std"))]
     pub fn from_bytes(bytes: &[u8]) -> Keypair {
         Keypair {
             secret: SecretKey::from_bytes(&bytes[..SECRETKEYBYTES]),
@@ -67,6 +66,7 @@ impl Keypair {
     /// * 'msg' - message to sign
     /// 
     /// Returns Option<Signature>
+    #[cfg(not(feature = "no_std"))]
     pub fn sign(&self, msg: &[u8], ctx: Option<&[u8]>, hedged: bool) -> Option<Signature> {
         self.secret.sign(msg, ctx, hedged)
     }
@@ -90,6 +90,8 @@ impl Keypair {
     /// * 'msg' - message to sign
     /// 
     /// Returns Option<Signature>
+    #[cfg(not(feature = "no_std"))]
+
     pub fn prehash_sign(&self, msg: &[u8], ctx: Option<&[u8]>, hedged: bool, ph:crate::PH) -> Option<Signature> {
         self.secret.prehash_sign(msg, ctx, hedged, ph)
     }
@@ -108,12 +110,10 @@ impl Keypair {
 }
 
 /// Private key.
-#[cfg(not(feature = "verifier_only"))]
 pub struct SecretKey {
     pub bytes: [u8; SECRETKEYBYTES]
 }
 
-#[cfg(not(feature = "verifier_only"))]
 impl SecretKey {
     /// Returns a copy of underlying bytes.
     pub fn to_bytes(&self) -> [u8; SECRETKEYBYTES] {
@@ -142,6 +142,7 @@ impl SecretKey {
     /// * 'hedged' - wether to use RNG or not
     /// 
     /// Returns Option<Signature>
+    #[cfg(not(feature = "no_std"))]
     pub fn sign(&self, msg: &[u8], ctx: Option<&[u8]>, hedged: bool) -> Option<Signature> {
         match ctx {
             Some(x) => {
@@ -179,6 +180,7 @@ impl SecretKey {
     /// * 'ph' - pre-hash function
     /// 
     /// Returns Option<Signature>
+    #[cfg(not(feature = "no_std"))]
     pub fn prehash_sign(&self, msg: &[u8], ctx: Option<&[u8]>, hedged: bool, ph:crate::PH) -> Option<Signature>  {
         let mut oid = [0u8; 11];
         let mut phm: Vec<u8> = Vec::new();
@@ -335,7 +337,7 @@ impl PublicKey {
 }
 
 #[cfg(test)]
-#[cfg(not(feature = "verifier_only"))]
+#[cfg(not(feature = "no_std"))]
 mod tests {
     use super::Keypair;
     #[test]

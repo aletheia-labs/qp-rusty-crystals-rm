@@ -6,13 +6,13 @@ pub const KEYPAIRBYTES: usize = SECRETKEYBYTES + PUBLICKEYBYTES;
 pub type Signature = [u8; SIGNBYTES];
 
 /// A pair of private and public keys.
-#[cfg(not(feature = "verifier_only"))]
+#[cfg(not(feature = "no_std"))]
 pub struct Keypair {
     pub secret: SecretKey,
     pub public: PublicKey
 }
 
-#[cfg(not(feature = "verifier_only"))]
+#[cfg(not(feature = "no_std"))]
 impl Keypair {
     /// Generate a Keypair instance.
     /// 
@@ -80,12 +80,12 @@ impl Keypair {
 }
 
 /// Private key.
-#[cfg(not(feature = "verifier_only"))]
+#[cfg(not(feature = "no_std"))]
 pub struct SecretKey {
     pub bytes: [u8; SECRETKEYBYTES]
 }
 
-#[cfg(not(feature = "verifier_only"))]
+#[cfg(not(feature = "no_std"))]
 impl SecretKey {
     /// Returns a copy of underlying bytes.
     pub fn to_bytes(&self) -> [u8; SECRETKEYBYTES] {
@@ -159,7 +159,7 @@ impl PublicKey {
 }
 
 #[cfg(test)]
-#[cfg(not(feature = "verifier_only"))]
+#[cfg(not(feature = "no_std"))]
 mod tests {
     const TEST_PK: [u8; crate::params::lvl2::PUBLICKEYBYTES] = [
         0x1C, 0x0E, 0xE1, 0x11, 0x1B, 0x08, 0x00, 0x3F, 0x28, 0xE6, 0x5E, 0x8B, 0x3B, 0xDE,

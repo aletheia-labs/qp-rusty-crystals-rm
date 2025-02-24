@@ -1,4 +1,4 @@
-#[cfg(not(feature = "verifier_only"))]
+#[cfg(not(feature = "no_std"))]
 use rand::RngCore;
 
 use crate::{fips202, packing, params, poly, poly::Poly, polyvec, polyvec::lvl3::{Polyveck, Polyvecl}};
@@ -11,7 +11,7 @@ const L: usize = params::lvl3::L;
 /// 
 /// * 'bytes' - an array to fill with random data
 /// * 'n' - number of bytes to generate
-#[cfg(not(feature = "verifier_only"))]
+#[cfg(not(feature = "no_std"))]
 fn random_bytes(bytes: &mut [u8], n: usize) {
     rand::prelude::thread_rng().try_fill_bytes(&mut bytes[..n]).unwrap();
 }
@@ -23,7 +23,7 @@ fn random_bytes(bytes: &mut [u8], n: usize) {
 /// * 'pk' - preallocated buffer for public key
 /// * 'sk' - preallocated buffer for private key
 /// * 'seed' - optional seed; if None [random_bytes()] is used for randomness generation
-#[cfg(not(feature = "verifier_only"))]
+#[cfg(not(feature = "no_std"))]
 pub fn keypair(pk: &mut [u8], sk: &mut [u8], seed: Option<&[u8]>) {
     let mut init_seed: Vec<u8>;
     match seed {
@@ -85,7 +85,7 @@ pub fn keypair(pk: &mut [u8], sk: &mut [u8], seed: Option<&[u8]>) {
 /// * 'msg' - message to sign
 /// * 'sk' - private key to use
 /// * 'randomized' - indicates wether to randomize the signature or to act deterministicly
-#[cfg(not(feature = "verifier_only"))]
+#[cfg(not(feature = "no_std"))]
 pub fn signature(sig: &mut [u8], msg: &[u8], sk: &[u8], randomized: bool) {
     let mut rho = [0u8; params::SEEDBYTES];
     let mut tr = [0u8; params::SEEDBYTES];
@@ -276,7 +276,7 @@ pub fn verify(sig: &[u8], m: &[u8], pk: &[u8]) -> bool {
 }
 
 #[cfg(test)]
-#[cfg(not(feature = "verifier_only"))]
+#[cfg(not(feature = "no_std"))]
 mod tests {
     #[test]
     fn self_verify_randomized() {
