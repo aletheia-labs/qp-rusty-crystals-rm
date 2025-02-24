@@ -2,6 +2,10 @@ use crate::{fips202, packing, params, poly, poly::Poly, polyvec, polyvec::lvl5::
 const K: usize = params::ml_dsa_87::K;
 const L: usize = params::ml_dsa_87::L;
 
+#[cfg(feature = "no_std")]
+extern crate alloc; // this makes Vec work
+#[cfg(feature = "no_std")]
+use alloc::vec::Vec;
 /// Generate public and private key.
 /// 
 /// # Arguments
@@ -9,14 +13,18 @@ const L: usize = params::ml_dsa_87::L;
 /// * 'pk' - preallocated buffer for public key
 /// * 'sk' - preallocated buffer for private key
 /// * 'seed' - optional seed; if None [random_bytes()] is used for randomness generation
-#[cfg(not(feature = "verifier_only"))]
 pub fn keypair(pk: &mut [u8], sk: &mut [u8], seed: Option<&[u8]>) {
     let mut init_seed: Vec<u8>;
     match seed {
         Some(x) => init_seed = x.to_vec(),
         None => {
+            #[cfg(feature = "no_std")]
+            unimplemented!("must provide entropy in verifier only mode");
+            #[cfg(not(feature = "no_std"))]
+            {
             init_seed = vec![0u8; params::SEEDBYTES];
             crate::random_bytes(&mut init_seed, params::SEEDBYTES)
+            }
         }
     };
 
@@ -71,7 +79,10 @@ pub fn keypair(pk: &mut [u8], sk: &mut [u8], seed: Option<&[u8]>) {
 /// * 'msg' - message to sign
 /// * 'sk' - private key to use
 /// * 'hedged' - indicates wether to randomize the signature or to act deterministicly
-#[cfg(not(feature = "verifier_only"))]
+/// 
+/// Note signature depends on std because k_decompose depends on swap which depends on std
+/// 
+#[cfg(not(feature = "no_std"))]
 pub fn signature(sig: &mut [u8], msg: &[u8], sk: &[u8], hedged: bool) {
     let mut rho = [0u8; params::SEEDBYTES];
     let mut tr = [0u8; params::TR_BYTES];
@@ -90,7 +101,11 @@ pub fn signature(sig: &mut [u8], msg: &[u8], sk: &[u8], hedged: bool) {
 
     let mut rnd = [0u8; params::SEEDBYTES];
     if hedged {
+        #[cfg(not(feature = "no_std"))]
         crate::random_bytes(&mut rnd, params::SEEDBYTES);
+        #[cfg(feature = "no_std")]
+        unimplemented!("hedged mode doesn't work in verifier only mode");
+
     }
     state.init();
     fips202::shake256_absorb(&mut state, &keymu[..params::SEEDBYTES], params::SEEDBYTES);
@@ -267,7 +282,7 @@ pub fn verify(sig: &[u8], m: &[u8], pk: &[u8]) -> bool {
 }
 
 #[cfg(test)]
-#[cfg(not(feature = "verifier_only"))]
+#[cfg(not(feature = "no_std"))]
 mod tests {
     #[test]
     fn self_verify_hedged() {
