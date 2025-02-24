@@ -6,7 +6,7 @@ use rand_chacha::rand_core::{RngCore as ChaChaCore, SeedableRng};
 use rusty_crystals_dilithium::ml_dsa_87::Keypair;
 use sha2::Sha512;
 use sha2::digest::FixedOutput;
-use hmac::{Mac};
+use hmac::Mac;
 
 mod tests;
 
