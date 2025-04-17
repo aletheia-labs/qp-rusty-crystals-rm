@@ -1,3 +1,7 @@
+use crate::errors::KeyParsingError;
+use crate::errors::KeyParsingError::BadSecretKey;
+use core::fmt;
+
 pub const SECRETKEYBYTES: usize = crate::params::lvl5::SECRETKEYBYTES;
 pub const PUBLICKEYBYTES: usize = crate::params::lvl5::PUBLICKEYBYTES;
 pub const SIGNBYTES: usize = crate::params::lvl5::SIGNBYTES;
@@ -7,6 +11,7 @@ pub type Signature = [u8; SIGNBYTES];
 
 /// A pair of private and public keys.
 #[cfg(not(feature = "no_std"))]
+#[derive(Clone)]
 pub struct Keypair {
     pub secret: SecretKey,
     pub public: PublicKey
@@ -26,8 +31,8 @@ impl Keypair {
         let mut sk = [0u8; SECRETKEYBYTES];
         crate::sign::lvl5::keypair(&mut pk, &mut sk, entropy);
         Keypair {
-            secret: SecretKey::from_bytes(&sk),
-            public: PublicKey::from_bytes(&pk)
+            secret: SecretKey::from_bytes(&sk).expect("Should never fail"),
+            public: PublicKey::from_bytes(&pk).expect("Should never fail")
         }
     }
 
@@ -48,11 +53,20 @@ impl Keypair {
     /// * 'bytes' - private and public keys bytes
     /// 
     /// Returns a Keypair
-    pub fn from_bytes(bytes: &[u8]) -> Keypair {
-        Keypair {
-            secret: SecretKey::from_bytes(&bytes[..SECRETKEYBYTES]),
-            public: PublicKey::from_bytes(&bytes[SECRETKEYBYTES..])
+    pub fn from_bytes(bytes: &[u8]) -> Result<Keypair, KeyParsingError> {
+        if bytes.len() != SECRETKEYBYTES + PUBLICKEYBYTES {
+            return Err(KeyParsingError::BadKeypair);
         }
+
+        let (secret_bytes, public_bytes) = bytes.split_at(SECRETKEYBYTES);
+        let secret = SecretKey::from_bytes(secret_bytes)
+            .map_err(|_| KeyParsingError::BadKeypair)?;
+        let public = PublicKey::from_bytes(public_bytes)
+            .map_err(|_| KeyParsingError::BadKeypair)?;
+        Ok(Keypair {
+            secret,
+            public
+        })
     }
 
     /// Compute a signature for a given message.
@@ -79,8 +93,18 @@ impl Keypair {
     }
 }
 
+impl fmt::Debug for Keypair {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Keypair")
+            .field("public", &self.public)
+            .finish()
+    }
+}
+
+
 /// Private key.
 #[cfg(not(feature = "no_std"))]
+#[derive(Clone)]
 pub struct SecretKey {
     pub bytes: [u8; SECRETKEYBYTES]
 }
@@ -99,9 +123,11 @@ impl SecretKey {
     /// * 'bytes' - private key bytes
     /// 
     /// Returns a SecretKey
-    pub fn from_bytes(bytes: &[u8]) -> SecretKey {
-        SecretKey {
-            bytes: bytes.try_into().expect("")
+    pub fn from_bytes(bytes: &[u8]) -> Result<SecretKey, KeyParsingError> {
+        let result = bytes.try_into();
+        match result {
+            Ok(bytes) => Ok(SecretKey { bytes }),
+            Err(_) => Err(BadSecretKey)
         }
     }
 
@@ -119,6 +145,7 @@ impl SecretKey {
     }
 }
 
+#[derive(Eq, Clone, PartialEq, Debug, Hash, PartialOrd, Ord)]
 pub struct PublicKey {
     pub bytes: [u8; PUBLICKEYBYTES]
 }
@@ -136,9 +163,11 @@ impl PublicKey {
     /// * 'bytes' - public key bytes
     /// 
     /// Returns a PublicKey
-    pub fn from_bytes(bytes: &[u8]) -> PublicKey {
-        PublicKey {
-            bytes: bytes.try_into().expect("")
+    pub fn from_bytes(bytes: &[u8]) -> Result<PublicKey, KeyParsingError> {
+        let result = bytes.try_into();
+        match result {
+            Ok(bytes) => Ok(PublicKey { bytes }),
+            Err(_) => Err(KeyParsingError::BadPublicKey)
         }
     }
 
@@ -176,20 +205,24 @@ mod tests {
         let test = super::Keypair::generate(Some(&seed));
         assert_eq!(test.public.to_bytes(), TEST_PK);
         assert_eq!(test.secret.to_bytes(), TEST_SK);
+        let test_bytes = test.to_bytes();
+        let from_bytes = super::Keypair::from_bytes(&test_bytes).unwrap();
+        assert_eq!(from_bytes.secret.to_bytes(), test.secret.to_bytes());
+        assert_eq!(from_bytes.public.to_bytes(), test.public.to_bytes());
         assert_eq!(test.sign(&TEST_MSG), TEST_SIG);
         assert!(test.verify(&TEST_MSG, &TEST_SIG));
     }
 
     #[test]
     fn secretkey() {
-        let test = super::SecretKey::from_bytes(&TEST_SK);
+        let test = super::SecretKey::from_bytes(&TEST_SK).unwrap();
         assert_eq!(test.to_bytes(), TEST_SK);
         assert_eq!(test.sign(&TEST_MSG), TEST_SIG);
     }
 
     #[test]
     fn publickey() {
-        let test = super::PublicKey::from_bytes(&TEST_PK);
+        let test = super::PublicKey::from_bytes(&TEST_PK).unwrap();
         assert_eq!(test.to_bytes(), TEST_PK);
         assert!(test.verify(&TEST_MSG, &TEST_SIG));
     }
