@@ -1,4 +1,5 @@
 use bip39::{Language, Mnemonic};
+use hmac::Mac;
 use rand::RngCore;
 use rand::rngs::OsRng;
 use rand_chacha::ChaCha20Rng;
@@ -6,7 +7,6 @@ use rand_chacha::rand_core::{RngCore as ChaChaCore, SeedableRng};
 use rusty_crystals_dilithium::ml_dsa_87::Keypair;
 use sha2::Sha512;
 use sha2::digest::FixedOutput;
-use hmac::Mac;
 
 mod tests;
 
@@ -24,14 +24,12 @@ pub enum HDLatticeError {
 
 /// Manages entropy generation for HD wallets
 pub struct HDLattice {
-    seed: [u8; 64],
-    master_key: [u8; 64],
+    pub seed: [u8; 64],
+    pub master_key: [u8; 64],
 }
 
 const HARDENED_OFFSET: u32 = 0x80000000;
 const SALT: &[u8] = b"Dilithium seed";
-
-
 
 impl HDLattice {
     /// Create new HDEntropy from a master seed
@@ -39,7 +37,7 @@ impl HDLattice {
     pub fn from_seed(seed: [u8; 64]) -> Result<Self, HDLatticeError> {
         Ok(Self {
             seed,
-            master_key: Self::master_key_from_seed(&seed)?
+            master_key: Self::master_key_from_seed(&seed)?,
         })
     }
 
@@ -54,15 +52,14 @@ impl HDLattice {
 
         Ok(Self {
             seed,
-            master_key: Self::master_key_from_seed(&seed)?
+            master_key: Self::master_key_from_seed(&seed)?,
         })
     }
 
-    pub fn master_key_from_seed(
-        seed: &[u8; 64],
-    ) -> Result<[u8; 64], HDLatticeError> {
-        let mut hasher = hmac::Hmac::<Sha512>::new_from_slice(SALT)
-            .map_err(|_| HDLatticeError::KeyDerivationFailed("Failed to create HMAC".to_string()))?;
+    pub fn master_key_from_seed(seed: &[u8; 64]) -> Result<[u8; 64], HDLatticeError> {
+        let mut hasher = hmac::Hmac::<Sha512>::new_from_slice(SALT).map_err(|_| {
+            HDLatticeError::KeyDerivationFailed("Failed to create HMAC".to_string())
+        })?;
         hasher.update(seed);
         Ok(hasher.finalize_fixed().into())
     }
@@ -77,7 +74,7 @@ impl HDLattice {
     }
 
     // Derives entropy from a seed along a given path
-    pub fn derive_entropy(&self, path: &str) -> Result<[u8;64], HDLatticeError> {
+    pub fn derive_entropy(&self, path: &str) -> Result<[u8; 64], HDLatticeError> {
         // If path is empty, return master seed
         if path.is_empty() {
             return Ok(self.master_key);
@@ -85,10 +82,13 @@ impl HDLattice {
         let entries = path.split('/');
         let mut entropy = self.master_key.clone();
         for (_, c) in entries.into_iter().enumerate() {
-
-            let mut child_index = c.parse::<u32>().map_err(|_| HDLatticeError::KeyDerivationFailed("Non-integer path".to_string()))?;
+            let mut child_index = c
+                .parse::<u32>()
+                .map_err(|_| HDLatticeError::KeyDerivationFailed("Non-integer path".to_string()))?;
             if child_index >= HARDENED_OFFSET {
-                Err(HDLatticeError::KeyDerivationFailed("Path index >= 0x80000000".to_string()))?
+                Err(HDLatticeError::KeyDerivationFailed(
+                    "Path index >= 0x80000000".to_string(),
+                ))?
             }
             child_index += HARDENED_OFFSET;
 
@@ -106,13 +106,12 @@ impl HDLattice {
         // HMAC(R || 0x00 || L || index)
         #[allow(clippy::unwrap_used)]
         let mut hasher = hmac::Hmac::<Sha512>::new_from_slice(&entropy[32..]).unwrap();
-        hasher.update(&[0x00]);                   // delimiter
+        hasher.update(&[0x00]); // delimiter
         hasher.update(&entropy[..32]);
         hasher.update(&index_buffer);
         hasher.finalize_fixed().into()
     }
 }
-
 
 /// Generate a new random mnemonic of the specified word count
 pub fn generate_mnemonic(word_count: usize) -> Result<String, HDLatticeError> {
@@ -147,4 +146,3 @@ pub fn generate_mnemonic(word_count: usize) -> Result<String, HDLatticeError> {
 
     Ok(mnemonic.words().collect::<Vec<&str>>().join(" "))
 }
-
