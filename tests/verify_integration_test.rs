@@ -9,7 +9,7 @@ fn keypair_from_test(test: &TestVector) -> Keypair {
     let mut result = vec![0; total_len];
     result[..test.sk.len()].copy_from_slice(&test.sk);
     result[test.sk.len()..].copy_from_slice(&test.pk);
-    Keypair::from_bytes(&result)
+    Keypair::from_bytes(&result).unwrap()
 }
 
 #[test]
@@ -68,7 +68,7 @@ fn test_verify_invalid_signature() {
     // Message to sign
     let message = b"Hello, Resonance!";
     // Sign the message
-    let signature = keys_2.sign(message, None, false).unwrap();
+    let signature = keys_2.sign(message, None, false);
 
     // Verify the signature with wrong key
     let result = keys_1.verify(&signature, message, None);

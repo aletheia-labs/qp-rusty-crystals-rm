@@ -15,7 +15,7 @@ fn test_sign() {
     let message = b"Hello, Dilithium!";
 
     // Step 3: Sign the message using the secret key
-    let signature = dilithium_keypair.sign(message, None, false).unwrap();
+    let signature = dilithium_keypair.sign(message, None, false);
 
     // Step 4: Verify the signature using the public key
     let verify_result = dilithium_keypair.verify(message, &signature, None);
