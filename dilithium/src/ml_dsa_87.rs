@@ -2,6 +2,9 @@ use sha2::{Sha256, Sha512, Digest};
 
 #[cfg(feature = "no_std")]
 use alloc::{vec, vec::Vec};
+use core::fmt;
+use crate::errors::KeyParsingError;
+use crate::errors::KeyParsingError::BadSecretKey;
 
 pub const SECRETKEYBYTES: usize = crate::params::ml_dsa_87::SECRETKEYBYTES;
 pub const PUBLICKEYBYTES: usize = crate::params::ml_dsa_87::PUBLICKEYBYTES;
@@ -11,6 +14,7 @@ pub const KEYPAIRBYTES: usize = SECRETKEYBYTES + PUBLICKEYBYTES;
 pub type Signature = [u8; SIGNBYTES];
 
 /// A pair of private and public keys.
+#[derive(Clone)]
 pub struct Keypair {
     pub secret: SecretKey,
     pub public: PublicKey
@@ -29,8 +33,8 @@ impl Keypair {
         let mut sk = [0u8; SECRETKEYBYTES];
         crate::sign::ml_dsa_87::keypair(&mut pk, &mut sk, entropy);
         Keypair {
-            secret: SecretKey::from_bytes(&sk),
-            public: PublicKey::from_bytes(&pk)
+            secret: SecretKey::from_bytes(&sk).expect("Should never fail"),
+            public: PublicKey::from_bytes(&pk).expect("Should never fail")
         }
     }
 
@@ -52,11 +56,19 @@ impl Keypair {
     /// 
     /// Returns a Keypair
     #[cfg(not(feature = "no_std"))]
-    pub fn from_bytes(bytes: &[u8]) -> Keypair {
-        Keypair {
-            secret: SecretKey::from_bytes(&bytes[..SECRETKEYBYTES]),
-            public: PublicKey::from_bytes(&bytes[SECRETKEYBYTES..])
+    pub fn from_bytes(bytes: &[u8]) -> Result<Keypair, KeyParsingError> {
+        if bytes.len() != crate::ml_dsa_87::SECRETKEYBYTES + crate::ml_dsa_87::PUBLICKEYBYTES {
+            return Err(KeyParsingError::BadKeypair);
         }
+        let (secret_bytes, public_bytes) = bytes.split_at(crate::ml_dsa_87::SECRETKEYBYTES);
+        let secret = SecretKey::from_bytes(secret_bytes)
+            .map_err(|_| KeyParsingError::BadKeypair)?;
+        let public = crate::ml_dsa_87::PublicKey::from_bytes(public_bytes)
+            .map_err(|_| KeyParsingError::BadKeypair)?;
+        Ok(Keypair {
+            secret,
+            public
+        })
     }
 
     /// Compute a signature for a given message.
@@ -66,7 +78,7 @@ impl Keypair {
     /// * 'msg' - message to sign
     /// 
     /// Returns Option<Signature>
-    pub fn sign(&self, msg: &[u8], ctx: Option<&[u8]>, hedged: bool) -> Option<Signature> {
+    pub fn sign(&self, msg: &[u8], ctx: Option<&[u8]>, hedged: bool) -> Signature {
         self.secret.sign(msg, ctx, hedged)
     }
 
@@ -108,7 +120,16 @@ impl Keypair {
     }
 }
 
+impl fmt::Debug for Keypair {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Keypair")
+            .field("public", &self.public)
+            .finish()
+    }
+}
+
 /// Private key.
+#[derive(Clone)]
 pub struct SecretKey {
     pub bytes: [u8; SECRETKEYBYTES]
 }
@@ -126,9 +147,11 @@ impl SecretKey {
     /// * 'bytes' - private key bytes
     /// 
     /// Returns a SecretKey
-    pub fn from_bytes(bytes: &[u8]) -> SecretKey {
-        SecretKey {
-            bytes: bytes.try_into().expect("")
+    pub fn from_bytes(bytes: &[u8]) -> Result<SecretKey, KeyParsingError> {
+        let result = bytes.try_into();
+        match result {
+            Ok(bytes) => Ok(SecretKey { bytes }),
+            Err(_) => Err(BadSecretKey)
         }
     }
 
@@ -141,11 +164,11 @@ impl SecretKey {
     /// * 'hedged' - wether to use RNG or not
     /// 
     /// Returns Option<Signature>
-    pub fn sign(&self, msg: &[u8], ctx: Option<&[u8]>, hedged: bool) -> Option<Signature> {
+    pub fn sign(&self, msg: &[u8], ctx: Option<&[u8]>, hedged: bool) -> Signature {
         match ctx {
             Some(x) => {
                 if x.len() > 255 {
-                    return None;
+                    panic!("ctx length must not be larger than 255");
                 }
                 let x_len = x.len();
                 let msg_len = msg.len();
@@ -155,7 +178,7 @@ impl SecretKey {
                 m[2+x_len..].copy_from_slice(msg);
                 let mut sig: Signature = [0u8; SIGNBYTES];
                 crate::sign::ml_dsa_87::signature(&mut sig, m.as_slice(), &self.bytes, hedged);
-                Some(sig)
+                sig
             },
             None => {
                 let msg_len = msg.len();
@@ -163,7 +186,7 @@ impl SecretKey {
                 m[2..].copy_from_slice(msg);
                 let mut sig: Signature = [0u8; SIGNBYTES];
                 crate::sign::ml_dsa_87::signature(&mut sig, m.as_slice(), &self.bytes, hedged);
-                Some(sig)
+                sig
             }
         }
     }
@@ -223,6 +246,7 @@ impl SecretKey {
     }
 }
 
+#[derive(Eq, Clone, PartialEq, Debug, Hash, PartialOrd, Ord)]
 pub struct PublicKey {
     pub bytes: [u8; PUBLICKEYBYTES]
 }
@@ -240,9 +264,11 @@ impl PublicKey {
     /// * 'bytes' - public key bytes
     /// 
     /// Returns a PublicKey
-    pub fn from_bytes(bytes: &[u8]) -> PublicKey {
-        PublicKey {
-            bytes: bytes.try_into().expect("")
+    pub fn from_bytes(bytes: &[u8]) -> Result<PublicKey, KeyParsingError> {
+        let result = bytes.try_into();
+        match result {
+            Ok(bytes) => Ok(PublicKey { bytes }),
+            Err(_) => Err(KeyParsingError::BadPublicKey)
         }
     }
 
@@ -345,7 +371,7 @@ mod tests {
         crate::random_bytes(&mut msg, MSG_BYTES);
         let keys = Keypair::generate(None);
         let sig = keys.sign(&msg, None, true);
-        assert!(keys.verify(&msg, &sig.unwrap(), None));
+        assert!(keys.verify(&msg, &sig, None));
     }
     #[test]
     fn self_verify() {
@@ -354,7 +380,7 @@ mod tests {
         crate::random_bytes(&mut msg, MSG_BYTES);
         let keys = Keypair::generate(None);
         let sig = keys.sign(&msg, None, false);
-        assert!(keys.verify(&msg, &sig.unwrap(), None));
+        assert!(keys.verify(&msg, &sig, None));
     }
     #[test]
     fn self_verify_prehash_hedged() {

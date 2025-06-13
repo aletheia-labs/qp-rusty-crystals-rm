@@ -2,6 +2,7 @@
 
 #[cfg(feature = "no_std")]
 extern crate alloc;
+extern crate core;
 
 pub mod ml_dsa_44;
 pub mod ml_dsa_65;
@@ -18,6 +19,7 @@ pub mod polyvec;
 pub mod rounding;
 pub mod reduce;
 pub mod sign;
+mod errors;
 
 pub enum PH {
     SHA256,

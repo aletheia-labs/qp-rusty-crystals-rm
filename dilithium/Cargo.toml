@@ -25,4 +25,4 @@ harness = false
 
 [features]
 no_std = []
-default = ["rand"]
+default = ["dep:rand"]
