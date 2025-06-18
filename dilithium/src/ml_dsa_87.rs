@@ -55,15 +55,14 @@ impl Keypair {
     /// * 'bytes' - private and public keys bytes
     /// 
     /// Returns a Keypair
-    #[cfg(not(feature = "no_std"))]
     pub fn from_bytes(bytes: &[u8]) -> Result<Keypair, KeyParsingError> {
-        if bytes.len() != crate::ml_dsa_87::SECRETKEYBYTES + crate::ml_dsa_87::PUBLICKEYBYTES {
+        if bytes.len() != SECRETKEYBYTES + PUBLICKEYBYTES {
             return Err(KeyParsingError::BadKeypair);
         }
-        let (secret_bytes, public_bytes) = bytes.split_at(crate::ml_dsa_87::SECRETKEYBYTES);
+        let (secret_bytes, public_bytes) = bytes.split_at(SECRETKEYBYTES);
         let secret = SecretKey::from_bytes(secret_bytes)
             .map_err(|_| KeyParsingError::BadKeypair)?;
-        let public = crate::ml_dsa_87::PublicKey::from_bytes(public_bytes)
+        let public = PublicKey::from_bytes(public_bytes)
             .map_err(|_| KeyParsingError::BadKeypair)?;
         Ok(Keypair {
             secret,
