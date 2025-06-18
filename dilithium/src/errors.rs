@@ -1,4 +1,5 @@
 use core::fmt::Display;
+use core::fmt;
 
 #[derive(Debug)]
 pub enum KeyParsingError {
@@ -8,11 +9,11 @@ pub enum KeyParsingError {
 }
 
 impl Display for KeyParsingError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let str = match self {
-            KeyParsingError::BadSecretKey => "BadSecretKey".to_string(),
-            KeyParsingError::BadPublicKey => "BadPublicKey".to_string(),
-            KeyParsingError::BadKeypair => "BadKeypair".to_string(),
+            KeyParsingError::BadSecretKey => "BadSecretKey",
+            KeyParsingError::BadPublicKey => "BadPublicKey",
+            KeyParsingError::BadKeypair => "BadKeypair",
         };
         write!(f, "{}", str)
     }
