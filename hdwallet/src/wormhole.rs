@@ -76,7 +76,7 @@ impl WormholePair {
     /// * `secret` - Raw secret to verify.
     ///
     /// # Returns
-    /// `Ok(true)` if the address matches the derived one, `Ok(false)` otherwise.
+    /// `true` if the address matches the derived one, `false` otherwise.
     pub fn verify(address: H256, secret: &[u8; 32]) -> bool {
         let generated_address = Self::generate_pair_from_secret(secret).address;
         generated_address == address
