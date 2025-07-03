@@ -43,6 +43,8 @@ pub enum WormholeError {
 pub struct WormholePair {
     /// Deterministic Poseidon-derived address.
     pub address: H256,
+    /// First hash of secret
+    pub first_hash: H256,
     /// The hashed secret used to generate this address.
     pub secret: [u8; 32],
 }
@@ -74,10 +76,10 @@ impl WormholePair {
     /// * `secret` - Raw secret to verify.
     ///
     /// # Returns
-    /// `Ok(true)` if the address matches the derived one, `Ok(false)` otherwise.
-    pub fn verify(address: &H256, secret: &[u8; 32]) -> Result<bool, WormholeError> {
+    /// `true` if the address matches the derived one, `false` otherwise.
+    pub fn verify(address: H256, secret: &[u8; 32]) -> bool {
         let generated_address = Self::generate_pair_from_secret(secret).address;
-        Ok(&generated_address == address)
+        generated_address == address
     }
 
     /// Internal function that generates a `WormholePair` from a given secret.
@@ -94,6 +96,7 @@ impl WormholePair {
         let second_hash = PoseidonHasher::hash_no_pad(bytes_to_felts(&inner_hash));
         WormholePair {
             address: H256::from_slice(&second_hash),
+            first_hash: H256::from_slice(&inner_hash),
             secret: *secret,
         }
     }
@@ -117,6 +120,7 @@ mod tests {
 
         // We can't easily predict the exact hash output without mocking PoseidonHasher,
         // but we can verify that it's not zero and that it's deterministic
+        assert_ne!(pair.first_hash, H256::zero());
         assert_ne!(pair.address, H256::zero());
 
         // Verify determinism
@@ -131,11 +135,10 @@ mod tests {
         let pair = WormholePair::generate_pair_from_secret(&secret);
 
         // Act
-        let result = WormholePair::verify(&pair.address, &secret);
+        let result = WormholePair::verify(pair.address, &secret);
 
         // Assert
-        assert!(result.is_ok());
-        assert!(result.unwrap());
+        assert!(result);
     }
 
     #[test]
@@ -146,11 +149,10 @@ mod tests {
         let pair = WormholePair::generate_pair_from_secret(&secret);
 
         // Act
-        let result = WormholePair::verify(&pair.address, &wrong_secret);
+        let result = WormholePair::verify(pair.address, &wrong_secret);
 
         // Assert
-        assert!(result.is_ok());
-        assert!(!result.unwrap());
+        assert!(!result);
     }
 
     #[test]
@@ -166,7 +168,7 @@ mod tests {
         assert_eq!(pair.secret, secret);
 
         // 2. Verify that the derived address is consistent with our verification method
-        assert!(WormholePair::verify(&pair.address, &secret).unwrap());
+        assert!(WormholePair::verify(pair.address, &secret));
 
         // 3. Verify that even a small change in the secret produces a different address
         let mut altered_secret = secret;
@@ -220,9 +222,8 @@ mod tests {
         assert_ne!(pair.address, H256::zero());
 
         // Verification should work with the generated secret
-        let verification = WormholePair::verify(&pair.address, &pair.secret);
-        assert!(verification.is_ok());
-        assert!(verification.unwrap());
+        let verification = WormholePair::verify(pair.address, &pair.secret);
+        assert!(verification);
     }
 
     #[test]
