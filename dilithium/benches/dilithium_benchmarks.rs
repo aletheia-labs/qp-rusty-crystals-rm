@@ -3,7 +3,7 @@
 use criterion::{Criterion, criterion_group};
 
 mod dilithium_benches {
-    use rusty_crystals_dilithium::dilithium2::Keypair;
+    use rusty_crystals_dilithium::ml_dsa_87::Keypair;
 
     use super::*;
 
@@ -17,16 +17,16 @@ mod dilithium_benches {
         let keypair = Keypair::generate(None);
         let msg = b"";
 
-        c.bench_function("Dilithium signing", move |b| b.iter(|| keypair.sign(msg)));
+        c.bench_function("Dilithium signing", move |b| b.iter(|| keypair.sign(msg, None, false)));
     }
 
     fn verify(c: &mut Criterion) {
         let keypair = Keypair::generate(None);
         let msg = b"";
-        let sig = keypair.sign(msg);
+        let sig = keypair.sign(msg, None, false);
 
         c.bench_function("Dilithium signature verification", move |b| {
-            b.iter(|| keypair.verify(msg, sig.as_slice()))
+            b.iter(|| keypair.verify(msg, sig.as_slice(), None))
         });
     }
 

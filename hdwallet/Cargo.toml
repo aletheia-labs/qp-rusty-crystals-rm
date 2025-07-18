@@ -16,7 +16,9 @@ sp-core = { version = "35.0.0", default-features = false }
 poseidon-resonance = { git = "https://github.com/Quantus-Network/poseidon-resonance", default-features = false }
 hex-literal = "0.4.1"
 nam-tiny-hderive = { version = "0.3.1-nam.0" }
-
+serde_json = "1.0.140"
+hex = "0.4.3"
+serde = { version = "1.0", features = ["derive"] }
 
 [dev-dependencies]
 hex-literal = { version = "0.4.1", default-features = false }

@@ -2,7 +2,8 @@
 
 A Rust implementation of the ML-DSA (formerly "dilithium") post-quantum digital signature scheme with hierarchical deterministic (HD) wallet support.
 
-Specifically, this wallet imitates BIP-32 and BIP-39 (but not BIP-44) in its derivation of ml-dsa keys.
+Specifically, this wallet imitates BIP-32, BIP-39, and BIP-44 in its derivation of ml-dsa keys. 
+It does not support non-hardened keys because those depend on properties of elliptic curve keys not present in dilithium keys.
 
 The ml-dsa code was lifted with minimal changes from [Quantum Blockchain's port](https://github.com/Quantum-Blockchains/dilithium)
 of [pq-crystals](https://github.com/pq-crystals/dilithium) to Rust.
@@ -50,7 +51,7 @@ let hd = HDLattice::from_mnemonic(&mnemonic, None)
 let master_keys = hd.generate_keys();
 
 // Derive child keys
-let child_keys = hd.generate_derived_keys("0/1/2")
+let child_keys = hd.generate_derived_keys("0'/1'/2'")
     .expect("Failed to derive child keys");
 ```
 
@@ -88,7 +89,7 @@ cargo tarpaulin --workspace
 ### NIST KAT tests
 
 test_nist_kat test case in 'verify_integration_tests.rs' covers the NIST KAT test cases generated from the PQCrystals 
-for ML-DSA-65. We exported the test file from PQ-Crystals c code, and are importing and testing against it here. 
+for ML-DSA-87. We exported the test file from PQ-Crystals c code, and are importing and testing against it here. 
 
 To regenerate this file...
 ```

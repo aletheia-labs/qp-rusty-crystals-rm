@@ -1,13 +1,23 @@
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct TestVector {
+    pub(crate) seed: String,
+    pub(crate) path: String,
+    pub(crate) private_key: String,
+}
+
 #[cfg(test)]
 mod hdwallet_tests {
     use std::str::FromStr;
-    use crate::{HDLattice, HDLatticeError, generate_mnemonic, test_vectors::get_test_vectors};
-    use rand::Rng;
-    use rusty_crystals_dilithium::ml_dsa_87::Keypair;
-    use nam_tiny_hderive::bip32::ExtendedPrivKey;
-    use nam_tiny_hderive::bip44::ChildNumber;
+    use crate::{HDLattice, HDLatticeError, generate_mnemonic, test_vectors::{get_test_vectors, load_known_private_keys}};
+                use rand::Rng;
+                use rusty_crystals_dilithium::ml_dsa_87::Keypair;
+                use nam_tiny_hderive::bip32::ExtendedPrivKey;
+                use nam_tiny_hderive::bip44::ChildNumber;
+    use crate::test_vectors::{str_to_32_bytes, str_to_64_bytes};
 
-    #[test]
+    # [test]
     fn test_from_seed() {
         let mnemonic = "rocket primary way job input cactus submit menu zoo burger rent impose";
         let hd1 = HDLattice::from_mnemonic(&mnemonic, None).unwrap();
@@ -16,7 +26,7 @@ mod hdwallet_tests {
         assert_eq!(hd1.seed, hd2.seed);
     }
 
-    #[test]
+    # [test]
     fn test_mnemonic_creation() {
         // Test generating new mnemonic
         let mnemonic = dbg!(generate_mnemonic(12).unwrap());
@@ -79,7 +89,7 @@ mod hdwallet_tests {
     }
 
     // Leave this in, we may need to generate new test vectors
-    fn print_keys_mnemonics_paths_as_test_vector(keys: &[(Keypair, String, String)]) {
+    fn print_keys_mnemonics_paths_as_test_vector(keys: & [(Keypair, String, String)]) {
         let mut vector_str = String::from("[\n");
         for (_i, (key, mnemonic, path)) in keys.iter().enumerate() {
             vector_str.push_str(&format!(
@@ -98,7 +108,7 @@ mod hdwallet_tests {
         println!("{}", vector_str);
     }
 
-    #[test]
+    # [test]
     fn test_derive_seed() {
         for (expected_keys, mnemonic_str, derivation_path) in get_test_vectors() {
             let hd = HDLattice::from_mnemonic(mnemonic_str, None).unwrap();
@@ -126,7 +136,7 @@ mod hdwallet_tests {
         }
     }
 
-    #[test]
+    # [test]
     fn test_generate_mnemonic_valid_lengths() {
         let valid_lengths = [12, 15, 18, 21, 24];
         for &word_count in &valid_lengths {
@@ -147,7 +157,7 @@ mod hdwallet_tests {
         }
     }
 
-    #[test]
+    # [test]
     fn test_generate_mnemonic_invalid_length() {
         let invalid_lengths = [10, 14, 19, 25]; // Invalid word counts not allowed by BIP-39
         for &word_count in &invalid_lengths {
@@ -172,7 +182,7 @@ mod hdwallet_tests {
         }
     }
 
-    #[test]
+    # [test]
     fn test_derive_invalid_path() {
         // Create a sample HDLattice instance
         let mnemonic = "rocket primary way job input cactus submit menu zoo burger rent impose";
@@ -186,7 +196,7 @@ mod hdwallet_tests {
         );
     }
 
-    #[test]
+    # [test]
     fn test_derive_invalid_index() {
         // Create a sample HDLattice instance
         let mnemonic = "rocket primary way job input cactus submit menu zoo burger rent impose";
@@ -201,7 +211,7 @@ mod hdwallet_tests {
         );
     }
 
-    #[test]
+    # [test]
     fn test_derive_with_non_integer_path() {
         let mnemonic = "rocket primary way job input cactus submit menu zoo burger rent impose";
         let hd = HDLattice::from_mnemonic(&mnemonic, None).unwrap();
@@ -215,7 +225,7 @@ mod hdwallet_tests {
         );
     }
 
-    #[test]
+    # [test]
     fn test_generate_derived_keys_0() {
         // Rename test since it's no longer about 'm' path
         let mnemonic = "rocket primary way job input cactus submit menu zoo burger rent impose";
@@ -230,7 +240,7 @@ mod hdwallet_tests {
         );
     }
 
-    #[test]
+    # [test]
     fn test_tiny_hderive_api() {
         let mnemonic = "rocket primary way job input cactus submit menu zoo burger rent impose";
         let hd = HDLattice::from_mnemonic(&mnemonic, None).unwrap();
@@ -246,7 +256,7 @@ mod hdwallet_tests {
         assert_eq!(ext, child_ext);
     }
 
-    #[test]
+    # [test]
     fn test_wormhole_derivation() {
         let mnemonic = "rocket primary way job input cactus submit menu zoo burger rent impose";
         let hd = HDLattice::from_mnemonic(&mnemonic, None).unwrap();
@@ -261,12 +271,25 @@ mod hdwallet_tests {
         assert!(result3.is_ok());
     }
 
-    #[test]
+    # [test]
     fn test_master_key_from_seed() {
         let mnemonic = "rocket primary way job input cactus submit menu zoo burger rent impose";
         let hd = HDLattice::from_mnemonic(&mnemonic, None).unwrap();
         let master = HDLattice::master_key_from_seed(&hd.seed).unwrap();
         assert_eq!(master, hd.master_key, "Master key from seed should match the master key");
+    }
+
+    # [test]
+    fn test_entropy_from_seeds() {
+        let vectors = load_known_private_keys("./json/bip44_test_vectors.json").unwrap();
+
+        // For demonstration: print the parsed vectors
+        for vector in vectors {
+            println!("{:?}", vector);
+            let hd = HDLattice::from_seed(str_to_64_bytes(&vector.seed)).unwrap();
+            let entropy = hd.derive_entropy(&*vector.path).unwrap();
+            assert_eq!(entropy, str_to_32_bytes(&vector.private_key), "Expected private keys to match python's bip-utils");
+        }
     }
 
 }
