@@ -1,8 +1,11 @@
 #[cfg(test)]
 mod hdwallet_tests {
+    use std::str::FromStr;
+    use crate::{HDLattice, HDLatticeError, generate_mnemonic, test_vectors::get_test_vectors};
     use rand::Rng;
-    use rusty_crystals_dilithium::ml_dsa_87::{Keypair};
-    use crate::{generate_mnemonic, test_vectors::get_test_vectors, HDLattice, HDLatticeError};
+    use rusty_crystals_dilithium::ml_dsa_87::Keypair;
+    use nam_tiny_hderive::bip32::ExtendedPrivKey;
+    use nam_tiny_hderive::bip44::ChildNumber;
 
     #[test]
     fn test_from_seed() {
@@ -18,18 +21,18 @@ mod hdwallet_tests {
         // Test generating new mnemonic
         let mnemonic = dbg!(generate_mnemonic(12).unwrap());
         assert_eq!(mnemonic.split_whitespace().count(), 12);
-        println!("Generated mnemonic: {}", mnemonic);
+        // println!("Generated mnemonic: {}", mnemonic);
         // Test creating HDEntropy from mnemonic
         let hd = HDLattice::from_mnemonic(&mnemonic, None).unwrap();
         let hd2 = HDLattice::from_mnemonic(&mnemonic, None).unwrap();
         let hd3 = HDLattice::from_mnemonic(&mnemonic, Some("password")).unwrap();
-        println!("Generated hd: {:?}", hd.master_key);
+        // println!("Generated hd: {:?}", hd.master_key);
 
         // Derive some child seeds
         let master_key = hd.generate_keys();
         let key2 = hd2.generate_keys();
         let key3 = hd3.generate_keys();
-        println!("Generated keyz: {:?}", master_key.public.to_bytes());
+        // println!("Generated key: {:?}", master_key.public.to_bytes());
 
         // // Seeds should be different but deterministic
         assert_ne!(
@@ -41,34 +44,36 @@ mod hdwallet_tests {
             "keys are not deterministic"
         );
 
-        let derived_key = hd.generate_derived_keys("0/2147483647/1");
+        let derived_key = hd.generate_derived_keys("m/0'/2147483647'/1'").unwrap();
         assert_ne!(
             master_key.secret.bytes, derived_key.secret.bytes,
             "derived key not derived"
         );
 
-        // UNCOMMENT THIS AND RUN WITH `cargo test -- --nocapture` TO GENERATE TEST VECTORS
+        // // UNCOMMENT THIS AND RUN WITH `cargo test -- --nocapture` TO GENERATE TEST VECTORS
         // let vecs = generate_test_vectors(10);
         // print_keys_mnemonics_paths_as_test_vector(&vecs);
     }
 
     fn generate_test_vectors(n: u8) -> Vec<(Keypair, String, String)> {
-        (0..n).map(|_| {
-            let mnemonic = generate_mnemonic(12).unwrap();
-            let hd = HDLattice::from_mnemonic(&mnemonic, None).unwrap();
-            let path = generate_random_path();
-            let k = hd.generate_derived_keys(&path);
-            (k, mnemonic, path)
-        }).collect()
+        (0..n)
+            .map(|_| {
+                let mnemonic = generate_mnemonic(12).unwrap();
+                let hd = HDLattice::from_mnemonic(&mnemonic, None).unwrap();
+                let path = generate_random_path();
+                let k = hd.generate_derived_keys(&path).unwrap();
+                (k, mnemonic, path)
+            })
+            .collect()
     }
 
     fn generate_random_path() -> String {
         let mut rng = rand::thread_rng();
         let length = rng.gen_range(5..15);
 
-        (0..length)
+        "m/".to_owned() + &(0..length)
             .map(|_| rng.gen_range(1..100))
-            .map(|num| num.to_string())
+            .map(|num| num.to_string() + "\'")
             .collect::<Vec<_>>()
             .join("/")
     }
@@ -79,7 +84,11 @@ mod hdwallet_tests {
         for (_i, (key, mnemonic, path)) in keys.iter().enumerate() {
             vector_str.push_str(&format!(
                 "    (Keypair::from_bytes(&*vec![{}]), \"{}\", \"{}\"),\n",
-                key.to_bytes().iter().map(|b| format!("0x{:02x}", b)).collect::<Vec<String>>().join(", "),
+                key.to_bytes()
+                    .iter()
+                    .map(|b| format!("0x{:02x}", b))
+                    .collect::<Vec<String>>()
+                    .join(", "),
                 mnemonic,
                 path
             ));
@@ -93,26 +102,24 @@ mod hdwallet_tests {
     fn test_derive_seed() {
         for (expected_keys, mnemonic_str, derivation_path) in get_test_vectors() {
             let hd = HDLattice::from_mnemonic(mnemonic_str, None).unwrap();
-            println!("Deriving seed for path: {}", derivation_path);
+            // println!("Deriving seed for path: {}", derivation_path);
             // Generate keys based on the derivation path
             let generated_keys = if derivation_path == "" {
                 hd.generate_keys()
             } else {
-                hd.generate_derived_keys(derivation_path)
+                hd.generate_derived_keys(derivation_path).unwrap()
             };
 
             // Compare secret keys
             assert_eq!(
-                generated_keys.secret.bytes,
-                expected_keys.secret.bytes,
+                generated_keys.secret.bytes, expected_keys.secret.bytes,
                 "Secret key mismatch for path: {}",
                 derivation_path
             );
 
             // Compare public keys
             assert_eq!(
-                generated_keys.public.bytes,
-                expected_keys.public.bytes,
+                generated_keys.public.bytes, expected_keys.public.bytes,
                 "Public key mismatch for path: {}",
                 derivation_path
             );
@@ -123,8 +130,10 @@ mod hdwallet_tests {
     fn test_generate_mnemonic_valid_lengths() {
         let valid_lengths = [12, 15, 18, 21, 24];
         for &word_count in &valid_lengths {
-            let mnemonic = generate_mnemonic(word_count)
-                .expect(&format!("Failed to generate mnemonic for {} words", word_count));
+            let mnemonic = generate_mnemonic(word_count).expect(&format!(
+                "Failed to generate mnemonic for {} words",
+                word_count
+            ));
 
             // Split mnemonic into words and count them
             let word_count_result = mnemonic.split_whitespace().count();
@@ -156,7 +165,8 @@ mod hdwallet_tests {
                 assert!(
                     matches!(err, HDLatticeError::BadEntropyBitCount(_)),
                     "Unexpected error type for word count {}: {:?}",
-                    word_count, err
+                    word_count,
+                    err
                 );
             }
         }
@@ -171,9 +181,8 @@ mod hdwallet_tests {
         // Attempt to derive a key with an invalid path
         let result = hd.derive_entropy("abc");
 
-        assert!(
-            matches!(result, Err(HDLatticeError::KeyDerivationFailed(msg)) if msg == "Non-integer path"),
-            "Expected KeyDerivationFailed Non-integer path"
+        assert_eq!(result.err().unwrap(), HDLatticeError::GenericError(nam_tiny_hderive::Error::InvalidDerivationPath),
+                   "Expected InvalidChildNumber error"
         );
     }
 
@@ -184,28 +193,27 @@ mod hdwallet_tests {
         let hd = HDLattice::from_mnemonic(&mnemonic, None).unwrap();
 
         // Attempt to derive a key with an invalid index
-        let result = hd.derive_entropy("2147483648"); // Index exceeds HARDENED_OFFSET (2^31)
+        let result = hd.derive_entropy("m/2147483648'"); // Index exceeds HARDENED_OFFSET (2^31)
 
-        assert!(
-            matches!(result, Err(HDLatticeError::KeyDerivationFailed(msg)) if msg == "Path index >= 0x80000000"),
-            "Expected KeyDerivationFailed Path index >= 0x80000000"
+        assert!(result.is_err());
+        assert_eq!(result.err().unwrap(), HDLatticeError::GenericError(nam_tiny_hderive::Error::InvalidChildNumber),
+            "Expected InvalidChildNumber error"
         );
     }
 
     #[test]
     fn test_derive_with_non_integer_path() {
-        let mnemonic= "rocket primary way job input cactus submit menu zoo burger rent impose";
+        let mnemonic = "rocket primary way job input cactus submit menu zoo burger rent impose";
         let hd = HDLattice::from_mnemonic(&mnemonic, None).unwrap();
 
         // Valid derivation path with multiple levels
         let result = hd.derive_entropy("1/a/2");
 
-        assert!(
-            matches!(result, Err(HDLatticeError::KeyDerivationFailed(msg)) if msg == "Non-integer path"),
-            "Expected KeyDerivationFailed Non-integer path"
+        assert!(result.is_err());
+        assert_eq!(result.err().unwrap(), HDLatticeError::GenericError(nam_tiny_hderive::Error::InvalidDerivationPath),
+                   "Expected InvalidChildNumber error"
         );
     }
-
 
     #[test]
     fn test_generate_derived_keys_0() {
@@ -214,7 +222,7 @@ mod hdwallet_tests {
         let hd = HDLattice::from_mnemonic(&mnemonic, None).unwrap();
 
         // Test with empty string instead of "m"
-        let derived_key_0 = hd.derive_entropy("").unwrap();
+        let derived_key_0 = hd.derive_entropy("m").unwrap();
 
         assert_eq!(
             hd.master_key, derived_key_0,
@@ -223,67 +231,30 @@ mod hdwallet_tests {
     }
 
     #[test]
-    fn test_wormhole_path_derivation() {
+    fn test_tiny_hderive_api() {
         let mnemonic = "rocket primary way job input cactus submit menu zoo burger rent impose";
         let hd = HDLattice::from_mnemonic(&mnemonic, None).unwrap();
 
-        // Test regular path
-        let regular_keys = hd.generate_derived_keys("0/1/2");
-        
-        // Test wormhole path
-        let wormhole_keys = hd.generate_derived_keys("w/0/1/2");
+        // Test that nam-tiny-hderive works with our seed format
+        let seed: &[u8] = &[42; 64];
+        let path = "m/44'/60'/0'/0/0";
+        let ext = ExtendedPrivKey::derive(seed, path).unwrap();
+        assert_eq!(&ext.secret(), b"\x98\x84\xbf\x56\x24\xfa\xdd\x7f\xb2\x80\x4c\xfb\x0c\xb6\xf7\x1f\x28\x9e\x21\x1f\xcf\x0d\xe8\x36\xa3\x84\x17\x57\xda\xd9\x70\xd0");
 
-        // Keys should be different
-        assert_ne!(
-            regular_keys.secret.bytes,
-            wormhole_keys.secret.bytes,
-            "Wormhole and regular keys should be different"
-        );
-
-        // Same wormhole path should be deterministic
-        let wormhole_keys2 = hd.generate_derived_keys("w/0/1/2");
-        assert_eq!(
-            wormhole_keys.secret.bytes,
-            wormhole_keys2.secret.bytes,
-            "Wormhole keys should be deterministic"
-        );
-
-        // Different wormhole paths should be different
-        let wormhole_keys3 = hd.generate_derived_keys("w/0/1/3");
-        assert_ne!(
-            wormhole_keys.secret.bytes,
-            wormhole_keys3.secret.bytes,
-            "Different wormhole paths should produce different keys"
-        );
+        let base_ext = ExtendedPrivKey::derive(seed, "m/44'/60'/0'/0").unwrap();
+        let child_ext = base_ext.child(ChildNumber::from_str("0").unwrap()).unwrap();
+        assert_eq!(ext, child_ext);
     }
 
     #[test]
-    fn test_wormhole_path_validation() {
+    fn test_wormhole_derivation() {
         let mnemonic = "rocket primary way job input cactus submit menu zoo burger rent impose";
         let hd = HDLattice::from_mnemonic(&mnemonic, None).unwrap();
 
-        // Test invalid wormhole path format
-        let result = hd.derive_entropy("w");
-        assert!(result.is_err(), "Path 'w' should be invalid");
+        let result = hd.generate_wormhole_pair_from_path("m/44'/60'/0'");
+        assert!(result.is_err());
 
-        // Test valid wormhole path
-        let result = hd.derive_entropy("w/0/1/2");
-        assert!(result.is_ok(), "Path 'w/0/1/2' should be valid");
-    }
-
-    #[test]
-    fn test_wormhole_path_seed_separation() {
-        let mnemonic = "rocket primary way job input cactus submit menu zoo burger rent impose";
-        let hd = HDLattice::from_mnemonic(&mnemonic, None).unwrap();
-
-        // Test that wormhole paths with same indices but different prefixes produce different keys
-        let regular_path = hd.generate_derived_keys("0/1/2");
-        let wormhole_path = hd.generate_derived_keys("w/0/1/2");
-
-        assert_ne!(
-            regular_path.secret.bytes,
-            wormhole_path.secret.bytes,
-            "Wormhole and regular paths with same indices should produce different keys"
-        );
+        let result2 = hd.generate_wormhole_pair_from_path("m/44'/189189189'");
+        assert!(result2.is_ok());
     }
 }

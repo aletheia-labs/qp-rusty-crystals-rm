@@ -1,5 +1,8 @@
+use std::str::FromStr;
 use bip39::{Language, Mnemonic};
 use hmac::Mac;
+use nam_tiny_hderive::bip32::ExtendedPrivKey;
+use nam_tiny_hderive::Error;
 use poseidon_resonance::PoseidonHasher;
 use rand::RngCore;
 use rand::rngs::OsRng;
@@ -19,28 +22,39 @@ pub mod wormhole;
 
 pub use wormhole::{WormholeError, WormholePair};
 
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, thiserror::Error, PartialEq, Eq)]
 pub enum HDLatticeError {
     #[error("BIP39 error: {0}")]
     Bip39Error(String),
     #[error("Key derivation failed: {0}")]
     KeyDerivationFailed(String),
+    #[error("Non-hardened keys not supported because lattice")]
+    HardenedPathsOnly(),
     #[error("Bad entropy bit count: {0}")]
     BadEntropyBitCount(usize),
     #[error("Mnemonic derivation failed: {0}")]
     MnemonicDerivationFailed(String),
     #[error("Invalid wormhole path: {0}")]
     InvalidWormholePath(String),
+    #[error("Invalid BIP44 path: {0}")]
+    InvalidPath(String),
+    #[error("nam-tinyhderive error")]
+    GenericError(Error)
 }
 
 /// Manages entropy generation for HD wallets
 pub struct HDLattice {
     pub seed: [u8; 64],
-    pub master_key: [u8; 64],
+    pub master_key: [u8; 32],
 }
 
 const HARDENED_OFFSET: u32 = 0x80000000;
 const SALT: &[u8] = b"Dilithium seed";
+pub const ROOT_PATH: &str = "m";
+pub const PURPOSE: &str = "44'";
+pub const QUANTUS_DILITHIUM_CHAIN_ID: &str = "189189'";
+pub const QUANTUS_WORMHOLE_CHAIN_ID: &str = "189189189'";
+
 
 impl HDLattice {
     /// Create new HDEntropy from a master seed
@@ -67,86 +81,42 @@ impl HDLattice {
         })
     }
 
-    pub fn master_key_from_seed(seed: &[u8; 64]) -> Result<[u8; 64], HDLatticeError> {
-        let mut hasher = hmac::Hmac::<Sha512>::new_from_slice(SALT).map_err(|_| {
-            HDLatticeError::KeyDerivationFailed("Failed to create HMAC".to_string())
-        })?;
-        hasher.update(seed);
-        Ok(hasher.finalize_fixed().into())
+    pub fn master_key_from_seed(seed: &[u8; 64]) -> Result<[u8; 32], HDLatticeError> {
+        let ext = ExtendedPrivKey::derive(seed, "m").unwrap();
+
+        Ok(ext.secret())
     }
 
     pub fn generate_keys(&self) -> Keypair {
         Keypair::generate(Some(&self.seed))
     }
 
-    pub fn generate_derived_keys(&self, path: &str) -> Keypair {
-        let derived_entropy = self.derive_entropy(path);
-        Keypair::generate(Some(&derived_entropy.unwrap()))
+    pub fn generate_derived_keys(&self, path: &str) -> Result<Keypair, HDLatticeError> {
+        let derived_entropy = self.derive_entropy(path)?;
+        Ok(Keypair::generate(Some(&derived_entropy)))
+    }
+
+    pub fn check_path(&self, path: &str) -> Result<(), HDLatticeError> {
+        let p = nam_tiny_hderive::bip44::DerivationPath::from_str(path)
+            .map_err(|e| HDLatticeError::GenericError(e))?;
+        for element in p.iter() {
+            if !element.is_hardened() {
+                return Err(HDLatticeError::HardenedPathsOnly())
+            }
+        }
+        Ok(())
     }
 
     /// Derives entropy from a seed along a given path
-    pub fn derive_entropy(&self, path: &str) -> Result<[u8; 64], HDLatticeError> {
-        // If path is empty, return master seed
-        if path.is_empty() {
-            return Ok(self.master_key);
-        }
-
-        // Check if this is a wormhole path
-        let (is_wormhole, remaining_path) = if path.starts_with("w/") {
-            (true, &path[2..])
-        } else {
-            (false, path)
-        };
-
-        let entries = remaining_path.split('/');
-        let mut entropy = self.master_key.clone();
-
-        // For wormhole paths, we use a different salt to ensure separation
-        if is_wormhole {
-            let mut hasher =
-                hmac::Hmac::<Sha512>::new_from_slice(b"Wormhole seed").map_err(|_| {
-                    HDLatticeError::KeyDerivationFailed("Failed to create HMAC".to_string())
-                })?;
-            hasher.update(&entropy);
-            entropy = hasher.finalize_fixed().into();
-        }
-
-        // Continue with normal derivation
-        for (_, c) in entries.into_iter().enumerate() {
-            let mut child_index = c
-                .parse::<u32>()
-                .map_err(|_| HDLatticeError::KeyDerivationFailed("Non-integer path".to_string()))?;
-            if child_index >= HARDENED_OFFSET {
-                Err(HDLatticeError::KeyDerivationFailed(
-                    "Path index >= 0x80000000".to_string(),
-                ))?
-            }
-            child_index += HARDENED_OFFSET;
-
-            entropy = self.derive_child_entropy(&entropy, child_index); // derive the child key and recurse
-        }
-
-        Ok(entropy)
-    }
-
-    /// Derives a child key using hardened derivation only, where the index indicates a hardened child if >= HARDENED_OFFSET.
-    fn derive_child_entropy(&self, entropy: &[u8; 64], index: u32) -> [u8; 64] {
-        let index_buffer = index.to_be_bytes();
-
-        // Note - we follow Bip32 for the derived value since it is well known.
-        // HMAC(R || 0x00 || L || index)
-        #[allow(clippy::unwrap_used)]
-        let mut hasher = hmac::Hmac::<Sha512>::new_from_slice(&entropy[32..]).unwrap();
-        hasher.update(&[0x00]); // delimiter
-        hasher.update(&entropy[..32]);
-        hasher.update(&index_buffer);
-        hasher.finalize_fixed().into()
+    pub fn derive_entropy(&self, path: &str) -> Result<[u8; 32], HDLatticeError> {
+        self.check_path(path)?;
+        let xpriv = ExtendedPrivKey::derive(&self.seed, path).map_err(|_e| HDLatticeError::KeyDerivationFailed(path.to_string()))?;
+        Ok(xpriv.secret())
     }
 
     /// Generates a wormhole pair from the current entropy state
     pub fn generate_wormhole_pair(&self) -> Result<WormholePair, HDLatticeError> {
-        let secret = PoseidonHasher::hash(&self.master_key[..32]);
-        Ok(WormholePair::generate_pair_from_secret(&secret.0))
+        Ok(WormholePair::generate_pair_from_secret(&self.master_key))
     }
 
     /// Generates a wormhole pair from a specific path
@@ -154,15 +124,11 @@ impl HDLattice {
         &self,
         path: &str,
     ) -> Result<WormholePair, HDLatticeError> {
-        if !path.starts_with("w/") {
-            return Err(HDLatticeError::InvalidWormholePath(
-                "Path must start with 'w/' for wormhole addresses".to_string(),
-            ));
+        if path.split("/").nth(2) != Some(QUANTUS_WORMHOLE_CHAIN_ID) {
+            return Err(HDLatticeError::InvalidWormholePath(path.to_string()))
         }
-
         let entropy = self.derive_entropy(path)?;
-        let secret = PoseidonHasher::hash(&entropy[..32]);
-        Ok(WormholePair::generate_pair_from_secret(&secret.0))
+        Ok(WormholePair::generate_pair_from_secret(&entropy))
     }
 }
 

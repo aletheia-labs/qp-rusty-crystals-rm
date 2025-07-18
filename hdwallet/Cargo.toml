@@ -15,15 +15,13 @@ thiserror = { workspace = true }
 sp-core = { version = "35.0.0", default-features = false }
 poseidon-resonance = { git = "https://github.com/Quantus-Network/poseidon-resonance", default-features = false }
 hex-literal = "0.4.1"
+nam-tiny-hderive = { version = "0.3.1-nam.0" }
+
 
 [dev-dependencies]
-hex-literal = { version="0.4.1", default-features = false }
+hex-literal = { version = "0.4.1", default-features = false }
 
 [features]
 default = ["std"]
-std = [
-    "sp-core/std",
-    "poseidon-resonance/std",
-    "rand/std",
-]
+std = ["sp-core/std", "poseidon-resonance/std", "rand/std"]
 no_std = []
