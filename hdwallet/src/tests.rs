@@ -256,5 +256,17 @@ mod hdwallet_tests {
 
         let result2 = hd.generate_wormhole_pair_from_path("m/44'/189189189'");
         assert!(result2.is_ok());
+
+        let result3 = hd.generate_wormhole_pair();
+        assert!(result3.is_ok());
     }
+
+    #[test]
+    fn test_master_key_from_seed() {
+        let mnemonic = "rocket primary way job input cactus submit menu zoo burger rent impose";
+        let hd = HDLattice::from_mnemonic(&mnemonic, None).unwrap();
+        let master = HDLattice::master_key_from_seed(&hd.seed).unwrap();
+        assert_eq!(master, hd.master_key, "Master key from seed should match the master key");
+    }
+
 }
