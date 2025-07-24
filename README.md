@@ -5,9 +5,6 @@ A Rust implementation of the ML-DSA (formerly "dilithium") post-quantum digital 
 Specifically, this wallet imitates BIP-32, BIP-39, and BIP-44 in its derivation of ml-dsa keys. 
 It does not support non-hardened keys because those depend on properties of elliptic curve keys not present in dilithium keys.
 
-The ml-dsa code was lifted with minimal changes from [Quantum Blockchain's port](https://github.com/Quantum-Blockchains/dilithium)
-of [pq-crystals](https://github.com/pq-crystals/dilithium) to Rust.
-
 
 ## Overview
 
@@ -110,4 +107,5 @@ This repository has 100% code coverage for all critical logic and functionality.
 
 ## Acknowledgements
 
-Falcon signatures are generated, verified, and signed using the reference implementation in the [rust-fn-dsa crate](https://crates.io/crates/rust-fn-dsa). We would like to thank [Thomas Pornin](https://github.com/pornin) for his work on this invaluable library.
+The ml-dsa code was lifted with minimal changes from [Quantum Blockchain's port](https://github.com/Quantum-Blockchains/dilithium)
+of [pq-crystals](https://github.com/pq-crystals/dilithium) to Rust.
