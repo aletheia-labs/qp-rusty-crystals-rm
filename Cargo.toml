@@ -1,8 +1,5 @@
 [workspace]
-members = [
-    "hdwallet",
-    "dilithium"
-]
+members = ["hdwallet", "dilithium"]
 
 [workspace.dependencies]
 thiserror = "2.0.4"
@@ -20,3 +17,6 @@ crate-type = ["lib"]
 rusty-crystals-dilithium = { path = "./dilithium" }
 rusty-crystals-hdwallet = { path = "./hdwallet" }
 getrandom = { version = "0.2", features = ["js"] }
+
+[dev-dependencies]
+rand = "0.8"

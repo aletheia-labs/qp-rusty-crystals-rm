@@ -2275,6 +2275,7 @@ name = "rusty-crystals"
 version = "0.2.1"
 dependencies = [
  "getrandom 0.2.16",
+ "rand 0.8.5",
  "rusty-crystals-dilithium",
  "rusty-crystals-hdwallet",
 ]
