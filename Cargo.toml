@@ -1,5 +1,5 @@
 [workspace]
-members = ["hdwallet", "dilithium"]
+members = ["dilithium", "hdwallet"]
 
 [workspace.dependencies]
 thiserror = "2.0.4"
