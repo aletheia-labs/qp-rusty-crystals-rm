@@ -7,14 +7,20 @@ description = "Pure RUST implementation of CRYSTALS-Dilithium digital signature 
 readme = "README.md"
 homepage = "https://www.quantumblockchains.io/"
 repository = "https://github.com/Quantum-Blockchains/dilithium"
-keywords = ["cryptography", "quantum", "dilithium", "digital-signatures", "security"]
+keywords = [
+	"cryptography",
+	"digital-signatures",
+	"dilithium",
+	"quantum",
+	"security",
+]
 categories = ["cryptography", "post-quantum-cryptography"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 rand = { version = "0.7.3", optional = true }
-sha2 = { version = "0.10.8" , default-features = false }
+sha2 = { version = "0.10.8", default-features = false }
 
 [dev-dependencies]
 criterion = { version = "0.5.1", features = ["html_reports"] }
