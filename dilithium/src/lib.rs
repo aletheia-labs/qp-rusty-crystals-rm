@@ -1,4 +1,16 @@
 #![cfg_attr(feature = "no_std", no_std)]
+#![allow(clippy::identity_op)]
+#![allow(clippy::needless_range_loop)]
+#![allow(clippy::redundant_clone)]
+#![allow(clippy::unnecessary_cast)]
+#![allow(clippy::precedence)]
+#![allow(clippy::clone_on_copy)]
+#![allow(clippy::unnecessary_mut_passed)]
+#![allow(clippy::manual_div_ceil)]
+#![allow(clippy::enum_variant_names)]
+#![allow(clippy::derivable_impls)]
+#![allow(clippy::needless_return)]
+#![allow(clippy::empty_line_after_outer_attr)]
 
 #[cfg(feature = "no_std")]
 extern crate alloc;
