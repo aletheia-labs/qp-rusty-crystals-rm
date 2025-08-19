@@ -2218,8 +2218,8 @@ dependencies = [
 
 [[package]]
 name = "poseidon-resonance"
-version = "0.8.0"
-source = "git+https://github.com/Quantus-Network/poseidon-resonance?branch=polkadot-stable2506#4df7a3f6549f26b9e320dc82492ba10c6c682b06"
+version = "0.9.0"
+source = "git+https://github.com/Quantus-Network/poseidon-resonance#c37290f40cd821970c00844663cf22c7408457b7"
 dependencies = [
  "log",
  "parity-scale-codec",
@@ -2854,6 +2854,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "67b1b7a3b5fe4f1376887184045fcf45c69e92af734b7aaddc05fb777b6fbd03"
 
 [[package]]
+name = "socket2"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "233504af464074f9d066d7b5416c5f9b894a5862a6506e306f7b816cdd6f1807"
+dependencies = [
+ "libc",
+ "windows-sys",
+]
+
+[[package]]
 name = "sp-application-crypto"
 version = "41.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3230,9 +3240,9 @@ dependencies = [
 
 [[package]]
 name = "substrate-prometheus-endpoint"
-version = "0.17.2"
+version = "0.17.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fe1fee79cb0bf260bb84b4fa885fae887646894a971abddae3d9ac4921531540"
+checksum = "73389cae0245dee48633a2346fa7b82b5c77e586ff44493ea54f4e0ffa0ef827"
 dependencies = [
  "http-body-util",
  "hyper",
@@ -3414,6 +3424,8 @@ dependencies = [
  "parking_lot",
  "pin-project-lite",
  "slab",
+ "socket2",
+ "windows-sys",
 ]
 
 [[package]]
