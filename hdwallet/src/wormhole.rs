@@ -27,7 +27,7 @@
 //! Poseidon hashing, which is particularly well-suited for zero-knowledge proof systems.
 
 use poseidon_resonance::{
-	PoseidonHasher, digest_bytes_to_felts, injective_bytes_to_felts, injective_string_to_felt,
+	PoseidonHasher, digest_bytes_to_felts, injective_bytes_to_felts, injective_string_to_felts,
 };
 use sp_core::{H256, Hasher};
 
@@ -90,7 +90,7 @@ impl WormholePair {
 	/// to derive the wormhole address.
 	pub fn generate_pair_from_secret(secret: &[u8; 32]) -> WormholePair {
 		let mut preimage_felts = Vec::new();
-		let salt_felt = injective_string_to_felt(ADDRESS_SALT);
+		let salt_felt = injective_string_to_felts(ADDRESS_SALT);
 		let secret_felt = injective_bytes_to_felts(secret);
 		preimage_felts.extend_from_slice(&salt_felt);
 		preimage_felts.extend_from_slice(&secret_felt);
