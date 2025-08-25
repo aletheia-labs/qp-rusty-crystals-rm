@@ -26,7 +26,9 @@
 //! The wormhole addresses provide an additional layer of privacy and security by using
 //! Poseidon hashing, which is particularly well-suited for zero-knowledge proof systems.
 
-use poseidon_resonance::{PoseidonHasher, bytes_to_felts, string_to_felt};
+use poseidon_resonance::{
+	PoseidonHasher, digest_bytes_to_felts, injective_bytes_to_felts, injective_string_to_felt,
+};
 use sp_core::{H256, Hasher};
 
 /// Salt used when deriving wormhole addresses.
@@ -88,12 +90,12 @@ impl WormholePair {
 	/// to derive the wormhole address.
 	pub fn generate_pair_from_secret(secret: &[u8; 32]) -> WormholePair {
 		let mut preimage_felts = Vec::new();
-		let salt_felt = string_to_felt(ADDRESS_SALT);
-		let secret_felt = bytes_to_felts(secret);
-		preimage_felts.push(salt_felt);
+		let salt_felt = injective_string_to_felt(ADDRESS_SALT);
+		let secret_felt = injective_bytes_to_felts(secret);
+		preimage_felts.extend_from_slice(&salt_felt);
 		preimage_felts.extend_from_slice(&secret_felt);
 		let inner_hash = PoseidonHasher::hash_no_pad(preimage_felts);
-		let second_hash = PoseidonHasher::hash_no_pad(bytes_to_felts(&inner_hash));
+		let second_hash = PoseidonHasher::hash_no_pad(digest_bytes_to_felts(&inner_hash));
 		WormholePair {
 			address: H256::from_slice(&second_hash),
 			first_hash: H256::from_slice(&inner_hash),
