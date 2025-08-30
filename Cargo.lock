@@ -2002,8 +2002,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4e69bf016dc406eff7d53a7d3f7cf1c2e72c82b9088aac1118591e36dd2cd3e9"
 dependencies = [
  "bitcoin_hashes",
- "rand 0.8.5",
- "rand_core 0.6.4",
+ "rand 0.7.3",
+ "rand_core 0.5.1",
  "serde",
  "unicode-normalization",
 ]
@@ -2232,7 +2232,7 @@ dependencies = [
 [[package]]
 name = "poseidon-resonance"
 version = "0.9.0"
-source = "git+https://github.com/Quantus-Network/poseidon-resonance#2663eb5819ac36eac2a74ee3debfd642262c1c54"
+source = "git+https://github.com/Quantus-Network/poseidon-resonance#4d44267446406243e336bc7966d20452686f8347"
 dependencies = [
  "log",
  "parity-scale-codec",
@@ -3593,7 +3593,7 @@ checksum = "97fee6b57c6a41524a810daee9286c02d7752c4253064d0b05472833a438f675"
 dependencies = [
  "cfg-if",
  "digest 0.10.7",
- "rand 0.8.5",
+ "rand 0.7.3",
  "static_assertions",
 ]
 
