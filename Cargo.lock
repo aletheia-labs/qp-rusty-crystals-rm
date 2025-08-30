@@ -1999,8 +1999,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4e69bf016dc406eff7d53a7d3f7cf1c2e72c82b9088aac1118591e36dd2cd3e9"
 dependencies = [
  "bitcoin_hashes",
- "rand 0.8.5",
- "rand_core 0.6.4",
+ "rand 0.7.3",
+ "rand_core 0.5.1",
  "serde",
  "unicode-normalization",
 ]
@@ -2109,7 +2109,7 @@ dependencies = [
 [[package]]
 name = "plonky2"
 version = "1.0.2"
-source = "git+https://github.com/Quantus-Network/plonky2#80a10007d8359b54843acb826097561859a6b621"
+source = "git+https://github.com/Quantus-Network/plonky2#9c06fe53083dd1672951b6d5bc3aa03bde4d1a66"
 dependencies = [
  "ahash",
  "anyhow",
@@ -2130,12 +2130,13 @@ dependencies = [
 [[package]]
 name = "plonky2_field"
 version = "1.0.0"
-source = "git+https://github.com/Quantus-Network/plonky2#80a10007d8359b54843acb826097561859a6b621"
+source = "git+https://github.com/Quantus-Network/plonky2#9c06fe53083dd1672951b6d5bc3aa03bde4d1a66"
 dependencies = [
  "anyhow",
  "itertools 0.11.0",
  "num",
  "plonky2_util",
+ "rustc_version",
  "serde",
  "static_assertions",
  "unroll",
@@ -2144,12 +2145,12 @@ dependencies = [
 [[package]]
 name = "plonky2_maybe_rayon"
 version = "1.0.0"
-source = "git+https://github.com/Quantus-Network/plonky2#80a10007d8359b54843acb826097561859a6b621"
+source = "git+https://github.com/Quantus-Network/plonky2#9c06fe53083dd1672951b6d5bc3aa03bde4d1a66"
 
 [[package]]
 name = "plonky2_util"
 version = "1.0.0"
-source = "git+https://github.com/Quantus-Network/plonky2#80a10007d8359b54843acb826097561859a6b621"
+source = "git+https://github.com/Quantus-Network/plonky2#9c06fe53083dd1672951b6d5bc3aa03bde4d1a66"
 
 [[package]]
 name = "plotters"
@@ -3580,7 +3581,7 @@ checksum = "97fee6b57c6a41524a810daee9286c02d7752c4253064d0b05472833a438f675"
 dependencies = [
  "cfg-if",
  "digest 0.10.7",
- "rand 0.8.5",
+ "rand 0.7.3",
  "static_assertions",
 ]
 
