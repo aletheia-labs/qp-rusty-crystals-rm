@@ -72,7 +72,7 @@ dependencies = [
 
 [[package]]
 name = "al-rusty-crystals-dilithium"
-version = "0.0.2"
+version = "0.0.3"
 dependencies = [
  "criterion",
  "rand 0.7.3",
