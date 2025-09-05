@@ -2,6 +2,19 @@
 name = "al-rusty-crystals-hdwallet"
 version = "0.0.1"
 edition = "2021"
+license = "GPL-3.0"
+description = "Pure Quantus RUST implementation of HD wallet functionality with post-quantum cryptography"
+readme = "../README.md"
+homepage = "https://www.quantumblockchains.io/"
+repository = "https://github.com/aletheia-labs/qp-rusty-crystals-rm"
+keywords = [
+	"cryptography",
+	"hdwallet",
+	"post-quantum",
+	"quantum",
+	"security",
+]
+categories = ["cryptography"]
 
 [dependencies]
 al-rusty-crystals-dilithium = { workspace = true }
