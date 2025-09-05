@@ -2,7 +2,7 @@
 members = ["dilithium", "hdwallet"]
 
 [workspace.dependencies]
-al-rusty-crystals-dilithium = { path = "./dilithium", version = "0.0.2" }
+al-rusty-crystals-dilithium = { path = "./dilithium", version = "0.0.3" }
 al-rusty-crystals-hdwallet = { path = "./hdwallet", version = "0.0.2" }
 thiserror = "2.0.4"
 
