@@ -1,4 +1,4 @@
-# al-rusty-crystals-dilithium
+# qp-rusty-crystals-dilithium
 
 Pure Rust implementation of the ML-DSA (CRYSTALS-Dilithium) post-quantum digital signature scheme.
 
@@ -14,13 +14,13 @@ Pure Rust implementation of the ML-DSA (CRYSTALS-Dilithium) post-quantum digital
 Add to your `Cargo.toml`:
 ```toml
 [dependencies]
-al-rusty-crystals-dilithium = "0.0.2"
+qp-rusty-crystals-dilithium = "0.0.2"
 ```
 
 ### Basic Example
 
 ```rust
-use al_rusty_crystals_dilithium::{ml_dsa_44, Keypair};
+use qp_rusty_crystals_dilithium::{ml_dsa_44, Keypair};
 
 // Generate a keypair
 let keypair = ml_dsa_44::Keypair::generate(None);

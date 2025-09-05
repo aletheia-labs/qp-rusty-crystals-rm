@@ -8,8 +8,8 @@ This workspace provides post-quantum cryptographic primitives and HD wallet func
 
 This workspace contains two independent crates:
 
-- **`al-rusty-crystals-dilithium`** - ML-DSA digital signature implementation
-- **`al-rusty-crystals-hdwallet`** - HD wallet for post-quantum keys
+- **`qp-rusty-crystals-dilithium`** - ML-DSA digital signature implementation
+- **`qp-rusty-crystals-hdwallet`** - HD wallet for post-quantum keys
 
 ## Usage
 
@@ -17,11 +17,11 @@ This workspace contains two independent crates:
 
 ```toml
 [dependencies]
-al-rusty-crystals-dilithium = "0.0.2"
+qp-rusty-crystals-dilithium = "0.0.2"
 ```
 
 ```rust
-use al_rusty_crystals_dilithium::{ml_dsa_44, Keypair};
+use qp_rusty_crystals_dilithium::{ml_dsa_44, Keypair};
 
 // Generate keypair
 let keypair = ml_dsa_44::Keypair::generate(None);
@@ -38,11 +38,11 @@ let is_valid = keypair.public_key.verify(message, &signature);
 
 ```toml
 [dependencies]
-al-rusty-crystals-hdwallet = "0.0.2"
+qp-rusty-crystals-hdwallet = "0.0.2"
 ```
 
 ```rust
-use al_rusty_crystals_hdwallet::{generate_mnemonic, HDLattice};
+use qp_rusty_crystals_hdwallet::{generate_mnemonic, HDLattice};
 
 // Generate mnemonic
 let mnemonic = generate_mnemonic(24)?;
@@ -56,14 +56,14 @@ let keys = hd_wallet.generate_derived_keys("44'/0'/0'/0'/0'")?;
 
 ## Crates
 
-### al-rusty-crystals-dilithium
+### qp-rusty-crystals-dilithium
 ML-DSA digital signature implementation:
 - **ML-DSA-44, ML-DSA-65, ML-DSA-87** - All security levels
 - **NIST Compliant** - Verified against official test vectors  
 - **Pure Rust** - Memory-safe, no unsafe code
 - **High Performance** - Optimized implementation
 
-### al-rusty-crystals-hdwallet
+### qp-rusty-crystals-hdwallet
 Post-quantum HD wallet:
 - **BIP-39 Compatible** - Mnemonic phrase generation/restoration
 - **BIP-32 Derivation** - Hierarchical deterministic keys

@@ -2,8 +2,8 @@
 
 mod helpers;
 
-use al_rusty_crystals_dilithium::ml_dsa_87::{Keypair, PUBLICKEYBYTES};
 use helpers::kat::{parse_test_vectors, TestVector};
+use qp_rusty_crystals_dilithium::ml_dsa_87::{Keypair, PUBLICKEYBYTES};
 use rand::{thread_rng, Rng};
 
 fn keypair_from_test(test: &TestVector) -> Keypair {

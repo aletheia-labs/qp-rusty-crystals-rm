@@ -1,6 +1,6 @@
-use al_rusty_crystals_dilithium::ml_dsa_87::Keypair;
 use bip39::{Language, Mnemonic};
 use nam_tiny_hderive::{bip32::ExtendedPrivKey, Error};
+use qp_rusty_crystals_dilithium::ml_dsa_87::Keypair;
 use rand::{rngs::OsRng, RngCore};
 use rand_chacha::{
 	rand_core::{RngCore as ChaChaCore, SeedableRng},

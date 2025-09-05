@@ -16,8 +16,8 @@ mod hdwallet_tests {
 		},
 		HDLattice, HDLatticeError,
 	};
-	use al_rusty_crystals_dilithium::ml_dsa_87::Keypair;
 	use nam_tiny_hderive::{bip32::ExtendedPrivKey, bip44::ChildNumber};
+	use qp_rusty_crystals_dilithium::ml_dsa_87::Keypair;
 	use rand::Rng;
 	use std::str::FromStr;
 

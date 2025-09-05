@@ -169,7 +169,7 @@ jobs:
 
           gh release create "$NEW_VERSION" \
             --repo "$GITHUB_REPOSITORY" \
-            --title "Quantus al-rusty-crystals-dilithium - $NEW_VERSION" \
+            --title "Quantus qp-rusty-crystals-dilithium - $NEW_VERSION" \
             --notes-file release_notes.txt \
             --target master \
             $DRAFT_FLAG

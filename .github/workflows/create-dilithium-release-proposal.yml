@@ -143,10 +143,10 @@ jobs:
           
           # Update workspace dependency in main Cargo.toml
           echo "Updating dilithium workspace dependency in main Cargo.toml"
-          sed -i "/al-rusty-crystals-dilithium/s/version = \"[^\"]*\"/version = \"$new_cargo_version\"/" Cargo.toml
+          sed -i "/qp-rusty-crystals-dilithium/s/version = \"[^\"]*\"/version = \"$new_cargo_version\"/" Cargo.toml
 
           # Update Cargo.lock
-          cargo update --package al-rusty-crystals-dilithium
+          cargo update --package qp-rusty-crystals-dilithium
 
           # Commit changes
           git config user.name "${{ github.actor }}"

@@ -1,4 +1,4 @@
-# al-rusty-crystals-hdwallet
+# qp-rusty-crystals-hdwallet
 
 Hierarchical Deterministic (HD) wallet implementation for post-quantum ML-DSA keys, compatible with BIP-32, BIP-39, and BIP-44 standards.
 
@@ -15,14 +15,14 @@ Hierarchical Deterministic (HD) wallet implementation for post-quantum ML-DSA ke
 Add to your `Cargo.toml`:
 ```toml
 [dependencies]
-al-rusty-crystals-hdwallet = "0.0.2"
-al-rusty-crystals-dilithium = "0.0.2"
+qp-rusty-crystals-hdwallet = "0.0.2"
+qp-rusty-crystals-dilithium = "0.0.2"
 ```
 
 ### Basic Example
 
 ```rust
-use al_rusty_crystals_hdwallet::{generate_mnemonic, HDLattice};
+use qp_rusty_crystals_hdwallet::{generate_mnemonic, HDLattice};
 
 // Generate a new mnemonic
 let mnemonic = generate_mnemonic(24)?;

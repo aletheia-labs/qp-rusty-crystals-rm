@@ -1,22 +1,20 @@
 [package]
-name = "al-rusty-crystals-dilithium"
-version = "0.0.3"
+name = "qp-rusty-crystals-dilithium"
+version = "1.0.0"
 edition = "2021"
 license = "GPL-3.0"
 description = "Pure Quantus RUST implementation of CRYSTALS-Dilithium digital signature scheme"
 readme = "README.md"
-homepage = "https://www.quantumblockchains.io/"
-repository = "https://github.com/aletheia-labs/qp-rusty-crystals-rm"
+homepage = "https://www.quantus.com"
+repository = "https://github.com/Quantus-Network/qp-rusty-crystals"
 keywords = [
 	"cryptography",
-	"digital-signatures",
 	"dilithium",
+	"post-quantum",
 	"quantum",
-	"security",
+	"quantus-network",
 ]
 categories = ["cryptography"]
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 rand = { version = "0.7.3", optional = true }

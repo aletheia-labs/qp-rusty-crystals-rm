@@ -168,18 +168,18 @@ jobs:
           
           # Update workspace dependencies in main Cargo.toml
           echo "Updating hdwallet workspace dependency in main Cargo.toml"
-          sed -i "/al-rusty-crystals-hdwallet/s/version = \"[^\"]*\"/version = \"$new_cargo_version\"/" Cargo.toml
+          sed -i "/qp-rusty-crystals-hdwallet/s/version = \"[^\"]*\"/version = \"$new_cargo_version\"/" Cargo.toml
 
           # Update dilithium dependency if requested
           if [[ "$UPDATE_DILITHIUM" == "true" && -n "$LATEST_DILITHIUM_VERSION" ]]; then
             echo "Updating dilithium workspace dependency to version: $LATEST_DILITHIUM_VERSION"
-            sed -i "/al-rusty-crystals-dilithium/s/version = \"[^\"]*\"/version = \"$LATEST_DILITHIUM_VERSION\"/" Cargo.toml
+            sed -i "/qp-rusty-crystals-dilithium/s/version = \"[^\"]*\"/version = \"$LATEST_DILITHIUM_VERSION\"/" Cargo.toml
           fi
 
           # Update Cargo.lock
-          cargo update --package al-rusty-crystals-hdwallet
+          cargo update --package qp-rusty-crystals-hdwallet
           if [[ "$UPDATE_DILITHIUM" == "true" && -n "$LATEST_DILITHIUM_VERSION" ]]; then
-            cargo update --package al-rusty-crystals-dilithium
+            cargo update --package qp-rusty-crystals-dilithium
           fi
 
           # Commit changes
