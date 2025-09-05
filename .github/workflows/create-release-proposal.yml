@@ -152,8 +152,8 @@ jobs:
           
           # Update workspace dependencies in main Cargo.toml
           echo "Updating workspace dependencies in main Cargo.toml"
-          sed -i -E "s/(al-rusty-crystals-dilithium.*version=\")[0-9a-zA-Z.-]+(\")/\1$new_cargo_version\2/" Cargo.toml
-          sed -i -E "s/(al-rusty-crystals-hdwallet.*version=\")[0-9a-zA-Z.-]+(\")/\1$new_cargo_version\2/" Cargo.toml
+          sed -i "/al-rusty-crystals-dilithium/s/version = \"[^\"]*\"/version = \"$new_cargo_version\"/" Cargo.toml
+          sed -i "/al-rusty-crystals-hdwallet/s/version = \"[^\"]*\"/version = \"$new_cargo_version\"/" Cargo.toml
 
           # Update Cargo.lock
           cargo update --package al-rusty-crystals-dilithium --package al-rusty-crystals-hdwallet
