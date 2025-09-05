@@ -1,4 +1,4 @@
-# AL Rusty Crystals
+# Rusty Crystals
 
 A Rust implementation of the ML-DSA (CRYSTALS-Dilithium) post-quantum digital signature scheme with hierarchical deterministic (HD) wallet support.
 

@@ -1,4 +1,4 @@
-# qp-rusty-crystals-dilithium
+# Quantus Newtowrk CRYSTALS-Dilithium
 
 Pure Rust implementation of the ML-DSA (CRYSTALS-Dilithium) post-quantum digital signature scheme.
 
