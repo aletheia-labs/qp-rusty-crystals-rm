@@ -72,7 +72,7 @@ dependencies = [
 
 [[package]]
 name = "al-rusty-crystals-dilithium"
-version = "1.0.0"
+version = "0.0.1"
 dependencies = [
  "criterion",
  "rand 0.7.3",
@@ -81,7 +81,7 @@ dependencies = [
 
 [[package]]
 name = "al-rusty-crystals-hdwallet"
-version = "0.1.1"
+version = "0.0.1"
 dependencies = [
  "al-rusty-crystals-dilithium",
  "bip39",
