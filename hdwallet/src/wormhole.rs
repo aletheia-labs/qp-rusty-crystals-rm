@@ -26,7 +26,7 @@
 //! The wormhole addresses provide an additional layer of privacy and security by using
 //! Poseidon hashing, which is particularly well-suited for zero-knowledge proof systems.
 
-use poseidon_resonance::{
+use qp_poseidon::{
 	PoseidonHasher, digest_bytes_to_felts, injective_bytes_to_felts, injective_string_to_felts,
 };
 use sp_core::{H256, Hasher};
@@ -187,7 +187,7 @@ mod tests {
 		// 5. Verify that each stage of the hash process changes the result
 		// (Create a hash with salt but without the second hashing step)
 		let mut combined = Vec::with_capacity(ADDRESS_SALT.len() + secret.len());
-		combined.extend_from_slice(&ADDRESS_SALT.as_bytes());
+		combined.extend_from_slice(ADDRESS_SALT.as_bytes());
 		combined.extend_from_slice(&secret);
 		let first_hash = PoseidonHasher::hash(&combined);
 		assert_ne!(pair.address, first_hash);
