@@ -97,10 +97,8 @@ jobs:
             target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Build dilithium
-        run: |
-          cd dilithium
-          cargo build --locked
+      - name: Build workspace (for dilithium dependencies)
+        run: cargo build --workspace --locked
 
       - name: Test dilithium
         run: |

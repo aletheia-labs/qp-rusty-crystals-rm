@@ -137,9 +137,13 @@ jobs:
           git checkout "$SOURCE_BRANCH"
           git checkout -b "$branch_name"
           
-          # Update dilithium version only
+          # Update dilithium version
           echo "Updating dilithium/Cargo.toml to version: $new_cargo_version"
           sed -i -E "s/^version\s*=\s*\"[0-9a-zA-Z.-]+\"/version = \"$new_cargo_version\"/" dilithium/Cargo.toml
+          
+          # Update workspace dependency in main Cargo.toml
+          echo "Updating dilithium workspace dependency in main Cargo.toml"
+          sed -i "/al-rusty-crystals-dilithium/s/version = \"[^\"]*\"/version = \"$new_cargo_version\"/" Cargo.toml
 
           # Update Cargo.lock
           cargo update --package al-rusty-crystals-dilithium
@@ -148,7 +152,7 @@ jobs:
           git config user.name "${{ github.actor }}"
           git config user.email "${{ github.actor }}@users.noreply.github.com"
           
-          git add dilithium/Cargo.toml Cargo.lock
+          git add Cargo.toml dilithium/Cargo.toml Cargo.lock
           git commit -m "ci: Automate dilithium version bump to $NEW_VERSION"
           git push origin "$branch_name"
 
