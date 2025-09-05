@@ -81,7 +81,7 @@ dependencies = [
 
 [[package]]
 name = "al-rusty-crystals-hdwallet"
-version = "0.0.2"
+version = "0.0.3"
 dependencies = [
  "al-rusty-crystals-dilithium",
  "bip39",
