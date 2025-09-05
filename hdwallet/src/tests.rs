@@ -17,7 +17,7 @@ mod hdwallet_tests {
 	};
 	use nam_tiny_hderive::{bip32::ExtendedPrivKey, bip44::ChildNumber};
 	use rand::Rng;
-	use rusty_crystals_dilithium::ml_dsa_87::Keypair;
+	use al_rusty_crystals_dilithium::ml_dsa_87::Keypair;
 	use std::str::FromStr;
 
 	#[test]

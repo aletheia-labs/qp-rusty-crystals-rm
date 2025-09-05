@@ -5,7 +5,7 @@ use rand_chacha::{
 	ChaCha20Rng,
 	rand_core::{RngCore as ChaChaCore, SeedableRng},
 };
-use rusty_crystals_dilithium::ml_dsa_87::Keypair;
+use al_rusty_crystals_dilithium::ml_dsa_87::Keypair;
 use std::str::FromStr;
 
 #[cfg(test)]
